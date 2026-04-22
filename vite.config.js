@@ -8,11 +8,4 @@ export default defineConfig({
             refresh: true,
         }),
     ],
-    server: {
-        host: '0.0.0.0',
-        port: 5173,
-        hmr: {
-            host: 'revered-captive-alongside.ngrok-free.dev', // ← ganti pakai link ngrok kamu
-        },
-    },
 });
