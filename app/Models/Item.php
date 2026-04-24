@@ -15,9 +15,9 @@ class Item extends Model
         'kategori',
         'jenis_barang',
         'stok_awal',
-        'stok_total',
         'batas_minimum',
         'harga',
+        'foto',
     ];
 
     protected $casts = [

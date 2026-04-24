@@ -7,7 +7,7 @@ use App\Models\Borrowing;
 use Illuminate\Http\Request;
 use App\Services\BorrowingService;
 
-class TransaksiPeminjamanController extends Controller
+class BorrowingController extends Controller
 {
     public function __construct(protected BorrowingService $service) {}
 
@@ -21,7 +21,7 @@ class TransaksiPeminjamanController extends Controller
                 ->latest()
                 ->paginate(15);
 
-            return view('admin.peminjaman.index', compact('data'));
+            return view('admin.borrowings.index', compact('data'));
         }
 
         $data = Borrowing::with('item')
@@ -29,7 +29,7 @@ class TransaksiPeminjamanController extends Controller
             ->latest()
             ->paginate(10);
 
-        return view('user.peminjaman.index', compact('data'));
+        return view('user.borrowings.index', compact('data'));
     }
 
     // =========================================================
@@ -44,7 +44,7 @@ class TransaksiPeminjamanController extends Controller
             return redirect()->back()->with('error', 'Barang konsumsi tidak bisa dipinjam.');
         }
 
-        return view('user.peminjaman.create', compact('item'));
+        return view('user.borrowings.create', compact('item'));
     }
 
     // =========================================================
@@ -77,7 +77,7 @@ class TransaksiPeminjamanController extends Controller
                 $validated['tanggal_kembali'] ?? null,
             );
 
-            return redirect()->route('peminjaman.index')
+            return redirect()->route('borrowings.index')
                 ->with('success', 'Pengajuan peminjaman berhasil dikirim, menunggu persetujuan admin.');
 
         } catch (\Exception $e) {
@@ -129,6 +129,6 @@ class TransaksiPeminjamanController extends Controller
             abort(403);
         }
 
-        return view('peminjaman.show', compact('borrowing'));
+        return view('borrowings.show', compact('borrowing'));
     }
 }

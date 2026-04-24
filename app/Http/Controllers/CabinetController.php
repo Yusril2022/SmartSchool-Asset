@@ -6,7 +6,7 @@ use App\Models\Cabinet;
 use App\Models\Room;
 use Illuminate\Http\Request;
 
-class LemariController extends Controller
+class CabinetController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,7 +16,7 @@ class LemariController extends Controller
         // 🔥 GANTI KE CABINET + ROOM
         $lemaris = Cabinet::with('room')->get();
 
-        return view('admin.lemari.index', compact('lemaris'));
+        return view('admin.cabinets.index', compact('lemaris'));
     }
 
     /**
@@ -27,7 +27,7 @@ class LemariController extends Controller
         // 🔥 GANTI KE ROOM
         $ruangans = Room::all();
 
-        return view('admin.lemari.create', compact('ruangans'));
+        return view('admin.cabinets.create', compact('ruangans'));
     }
 
     /**
@@ -48,7 +48,7 @@ class LemariController extends Controller
             'id_ruangan' => $request->id_ruangan,
         ]);
 
-        return redirect()->route('lemari.index')
+        return redirect()->route('cabinets.index')
             ->with('success', 'Lemari berhasil ditambahkan');
     }
 
@@ -67,6 +67,28 @@ class LemariController extends Controller
         $lemari = Cabinet::findOrFail($id);
         $ruangans = Room::all();
 
-        return view('admin.lemari.edit', compact('lemari', 'ruangans'));
+        return view('admin.cabinets.edit', compact('lemari', 'ruangans'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $cabinet = Cabinet::findOrFail($id);
+
+        $request->validate([
+            'kode_lemari' => 'required|unique:cabinets,kode_lemari,' . $id,
+            // unique tapi kecualikan id ini sendiri
+            // supaya saat edit tidak dianggap duplicate sama dirinya sendiri
+            'nama_lemari' => 'required|string|max:255',
+            'id_ruangan'  => 'required|exists:rooms,id',
+        ]);
+
+        $cabinet->update([
+            'kode_lemari' => $request->kode_lemari,
+            'nama_lemari' => $request->nama_lemari,
+            'id_ruangan'  => $request->id_ruangan,
+        ]);
+
+        return redirect()->route('cabinets.index')
+            ->with('success', 'Lemari berhasil diupdate');
     }
 }

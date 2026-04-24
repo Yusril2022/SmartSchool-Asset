@@ -5,18 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\Room;
 use Illuminate\Http\Request;
 
-class LokasiRuanganController extends Controller
+class RoomController extends Controller
 {
     public function index()
     {
         $ruangans = Room::latest()->get();
 
-        return view('admin.lokasi-ruangan.index', compact('ruangans'));
+        return view('admin.rooms.index', compact('ruangans'));
     }
 
     public function create()
     {
-        return view('admin.lokasi-ruangan.create');
+        return view('admin.rooms.create');
     }
 
     public function store(Request $request)
@@ -31,7 +31,7 @@ class LokasiRuanganController extends Controller
             'nama_ruangan' => $request->nama_ruangan,
         ]);
 
-        return redirect()->route('lokasi-ruangan.index')
+        return redirect()->route('rooms.index')
             ->with('success', 'Ruangan berhasil ditambahkan');
     }
 
@@ -39,7 +39,7 @@ class LokasiRuanganController extends Controller
     {
         $ruangan = Room::findOrFail($id);
 
-        return view('admin.lokasi-ruangan.edit', compact('ruangan'));
+        return view('admin.rooms.edit', compact('ruangan'));
     }
 
     public function update(Request $request, $id)
@@ -56,7 +56,7 @@ class LokasiRuanganController extends Controller
             'nama_ruangan' => $request->nama_ruangan,
         ]);
 
-        return redirect()->route('lokasi-ruangan.index')
+        return redirect()->route('rooms.index')
             ->with('success', 'Ruangan berhasil diupdate');
     }
 
@@ -64,7 +64,7 @@ class LokasiRuanganController extends Controller
     {
         Room::findOrFail($id)->delete();
 
-        return redirect()->route('lokasi-ruangan.index')
+        return redirect()->route('rooms.index')
             ->with('success', 'Ruangan berhasil dihapus');
     }
 } 
