@@ -15,22 +15,22 @@ class BorrowingController extends Controller
     // LIST — beda tampilan untuk admin vs user
     // =========================================================
     public function index()
-    {
-        if (auth()->user()->role === 'admin') {
-            $data = Borrowing::with(['item.cabinet', 'user'])
-                ->latest()
-                ->paginate(15);
-
-            return view('admin.borrowings.index', compact('data'));
-        }
-
-        $data = Borrowing::with('item')
-            ->where('id_user', auth()->id())
+{
+    if (auth()->user()->role === 'admin') {
+        $data = Borrowing::with(['item', 'user'])
             ->latest()
-            ->paginate(10);
+            ->paginate(15);
 
-        return view('user.borrowings.index', compact('data'));
+        return view('admin.borrowings.index', compact('data'));
     }
+
+    $data = Borrowing::with('item')
+        ->where('id_user', auth()->id())
+        ->latest()
+        ->paginate(10);
+
+    return view('user.borrowings.index', compact('data'));
+}
 
     // =========================================================
     // FORM — hanya tampil untuk barang aset
@@ -125,10 +125,10 @@ class BorrowingController extends Controller
             ->findOrFail($id);
 
         // User biasa hanya bisa lihat punya sendiri
-        if (auth()->user()->role !== 'admin' && $borrowing->id_user !== auth()->id()) {
-            abort(403);
+        if (auth()->user()->role === 'admin') {
+            return view('admin.borrowings.show', compact('borrowing'));
         }
+        return view('user.borrowings.show', compact('borrowing'));
 
-        return view('borrowings.show', compact('borrowing'));
     }
 }

@@ -15,24 +15,32 @@ public function index()
 {
     if (auth()->user()->role === 'admin') {
 
-        // Data untuk dashboard admin
-        $totalBarang     = Item::count();
-        $totalAset       = Item::aset()->count();
-        $totalKonsumsi   = Item::konsumsi()->count();
-        $stokKritis      = Item::stokKritis()->count();
-
-        $totalPinjam     = Borrowing::where('status', 'dipinjam')->count();
-        $totalPending    = Borrowing::where('status', 'pending')->count();
-        $totalKembali    = Borrowing::where('status', 'dikembalikan')->count();
-
+        $totalBarang        = Item::count();
+        $totalAset          = Item::aset()->count();
+        $totalKonsumsi      = Item::konsumsi()->count();
+        $stokKritis         = Item::stokKritis()->count();
+        $totalPinjam        = Borrowing::where('status', 'dipinjam')->count();
+        $totalPending       = Borrowing::where('status', 'pending')->count();
+        $totalKembali       = Borrowing::where('status', 'dikembalikan')->count();
         $barangMasukHariIni = IncomingItem::whereDate('tanggal_masuk', today())->count();
 
-        // 5 peminjaman terbaru yang pending — untuk notifikasi admin
         $peminjamanPending = Borrowing::with(['item', 'user'])
             ->where('status', 'pending')
             ->latest()
             ->take(5)
             ->get();
+
+        $chartData = Borrowing::selectRaw('DATE(created_at) as tanggal, COUNT(*) as total')
+            ->where('created_at', '>=', now()->subDays(7))
+            ->groupBy('tanggal')
+            ->orderBy('tanggal')
+            ->get();
+
+        $chartLabels = $chartData->pluck('tanggal')
+            ->map(fn($d) => \Carbon\Carbon::parse($d)->format('d M'))
+            ->toArray();
+
+        $chartValues = $chartData->pluck('total')->toArray();
 
         return view('admin.dashboard', compact(
             'totalBarang',
@@ -44,10 +52,12 @@ public function index()
             'totalKembali',
             'barangMasukHariIni',
             'peminjamanPending',
+            'chartLabels',
+            'chartValues',
         ));
     }
 
-    // Data untuk dashboard user
+    // User biasa
     $peminjamanSaya = Borrowing::with('item')
         ->where('id_user', auth()->id())
         ->latest()
@@ -65,4 +75,5 @@ public function index()
         'riwayatAmbil',
     ));
 }
+
 }

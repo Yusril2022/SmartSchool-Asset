@@ -1,0 +1,3 @@
+# .prettierignore
+resources/views/**/*.blade.php
+*.blade.php

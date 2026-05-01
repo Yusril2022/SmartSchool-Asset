@@ -22,8 +22,8 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         <!-- PINJAM -->
-        <a href="{{ route('barang.user') }}"
-           class="bg-orange-500 hover:bg-orange-600 transition rounded-2xl p-6 text-white shadow-sm flex flex-col gap-2">
+        <a href="{{ route('items.user') }}"
+            class="bg-orange-500 hover:bg-orange-600 transition rounded-2xl p-6 text-white shadow-sm flex flex-col gap-2">
 
             <span class="text-lg font-semibold">
                 📦 Pinjam Barang
@@ -36,8 +36,8 @@
         </a>
 
         <!-- RIWAYAT -->
-        <a href="{{ route('peminjaman.index') }}"
-           class="bg-white border border-gray-200 hover:bg-gray-50 transition rounded-2xl p-6 text-gray-800 shadow-sm flex flex-col gap-2">
+        <a href="{{ route('borrowings.index') }}"
+            class="bg-white border border-gray-200 hover:bg-gray-50 transition rounded-2xl p-6 text-gray-800 shadow-sm flex flex-col gap-2">
 
             <span class="text-lg font-semibold">
                 📄 Riwayat Peminjaman

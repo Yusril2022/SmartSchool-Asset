@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('incoming_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('id_barang')->constrained('items')->cascadeOnDelete();
-            $table->foreignId('id_admin')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('id_user')->nullable()->change();
+            $table->string('nama_pengambil')->nullable()->after('id_user');
             $table->integer('jumlah_masuk');
             $table->timestamp('tanggal_masuk');
             $table->timestamps();
@@ -24,8 +25,11 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down(): void
+public function down(): void
     {
-        Schema::dropIfExists('incoming_items');
+        Schema::table('item_usages', function (Blueprint $table) {
+            $table->dropColumn('nama_pengambil');
+            $table->foreignId('id_user')->nullable(false)->change();
+        });
     }
 };

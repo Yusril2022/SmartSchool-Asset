@@ -20,14 +20,12 @@
 
             <!-- SEARCH -->
             <form method="GET" class="w-full md:w-72">
-                <input type="text" name="search"
-                    value="{{ request('search') }}"
-                    placeholder="Cari barang..."
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari barang..."
                     class="w-full px-4 py-2 rounded-lg bg-white border border-gray-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400">
             </form>
 
             <!-- BUTTON -->
-            <a href="{{ route('master-barang.create') }}"
+            <a href="{{ route('items.create') }}"
                 class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg shadow-sm transition">
                 Tambah
             </a>
@@ -115,18 +113,17 @@
                         <div class="flex justify-center gap-2">
 
                             <!-- EDIT -->
-                            <a href="{{ route('master-barang.edit', $barang->id) }}"
+                            <a href="{{ route('items.edit', $barang->id) }}"
                                 class="px-3 py-1.5 rounded-lg bg-yellow-100 text-yellow-600 hover:bg-yellow-200 transition text-xs font-medium">
                                 Edit
                             </a>
 
                             <!-- DELETE -->
-                            <form action="{{ route('master-barang.destroy', $barang->id) }}" method="POST">
+                            <form action="{{ route('items.destroy', $barang->id) }}" method="POST">
                                 @csrf
                                 @method('DELETE')
 
-                                <button
-                                    onclick="return confirm('Yakin hapus?')"
+                                <button onclick="return confirm('Yakin hapus?')"
                                     class="px-3 py-1.5 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition text-xs font-medium">
                                     Hapus
                                 </button>

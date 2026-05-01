@@ -10,7 +10,8 @@ class ItemUsage extends Model
 
     protected $fillable = [
         'id_barang',
-        'id_user',
+        'id_user',          // null kalau pengambil tidak login (konsumsi publik)
+        'nama_pengambil',   // diisi manual kalau tidak login
         'jumlah_ambil',
         'tanggal_ambil',
     ];
@@ -28,5 +29,14 @@ class ItemUsage extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user');
+    }
+
+    /**
+     * Nama yang tampil di riwayat — pakai nama user kalau login,
+     * pakai nama_pengambil kalau tidak login.
+     */
+    public function getNamaDisplayAttribute(): string
+    {
+        return $this->user?->name ?? $this->nama_pengambil ?? 'Tidak diketahui';
     }
 }

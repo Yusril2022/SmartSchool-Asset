@@ -24,12 +24,13 @@ return new class extends Migration
             $table->string('nama_barang');
             $table->string('kategori');
             $table->string('jenis_barang');
+            $table->string('merk')->nullable();          
+            $table->string('hasil_perolehan')->nullable();
             $table->integer('stok_awal');
             $table->integer('stok_total')->default(0);
             $table->integer('batas_minimum')->default(0);
             $table->bigInteger('harga')->default(0);
             $table->string('foto')->nullable();
-            
             $table->timestamps();
         });
     }

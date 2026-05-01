@@ -17,7 +17,7 @@
     <!-- CARD -->
     <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
 
-        <form action="{{ route('lokasi-ruangan.store') }}" method="POST" class="space-y-5">
+        <form action="{{ route('rooms.store') }}" method="POST" class="space-y-5">
             @csrf
 
             <!-- KODE -->
@@ -26,13 +26,11 @@
                     Kode Ruangan
                 </label>
 
-                <input type="text" name="kode_ruangan"
-                    value="{{ old('kode_ruangan') }}"
-                    placeholder="R001"
+                <input type="text" name="kode_ruangan" value="{{ old('kode_ruangan') }}" placeholder="R001"
                     class="w-full px-4 py-2 rounded-lg border border-gray-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400">
 
                 @error('kode_ruangan')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
@@ -42,26 +40,23 @@
                     Nama Ruangan
                 </label>
 
-                <input type="text" name="nama_ruangan"
-                    value="{{ old('nama_ruangan') }}"
-                    placeholder="Lab Komputer"
+                <input type="text" name="nama_ruangan" value="{{ old('nama_ruangan') }}" placeholder="Lab Komputer"
                     class="w-full px-4 py-2 rounded-lg border border-gray-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400">
 
                 @error('nama_ruangan')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
             <!-- ACTION -->
             <div class="flex justify-end gap-3 pt-2">
 
-                <a href="{{ route('lokasi-ruangan.index') }}"
-                   class="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-100 transition">
+                <a href="{{ route('rooms.index') }}"
+                    class="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-100 transition">
                     Batal
                 </a>
 
-                <button
-                    class="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg shadow-sm transition">
+                <button class="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg shadow-sm transition">
                     Simpan
                 </button>
 

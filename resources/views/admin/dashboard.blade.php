@@ -15,26 +15,44 @@
     </div>
 
     <!-- STATS -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
 
         <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
             <p class="text-gray-500 text-sm">Total Barang</p>
-            <h2 class="text-3xl font-bold text-gray-800 mt-2">12</h2>
+            <h2 class="text-3xl font-bold text-gray-800 mt-2">{{ $totalBarang }}</h2>
         </div>
 
         <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
             <p class="text-gray-500 text-sm">Total Stok</p>
-            <h2 class="text-3xl font-bold text-gray-800 mt-2">120</h2>
+            <h2 class="text-3xl font-bold text-gray-800 mt-2">{{ $totalAset }} Aset / {{ $totalKonsumsi }} Konsumsi</h2>
         </div>
 
         <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
             <p class="text-gray-500 text-sm">Barang Dipinjam</p>
-            <h2 class="text-3xl font-bold text-orange-500 mt-2">5</h2>
+            <h2 class="text-3xl font-bold text-orange-500 mt-2">{{ $totalPinjam }}</h2>
         </div>
 
         <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
             <p class="text-gray-500 text-sm">Barang Dikembalikan</p>
-            <h2 class="text-3xl font-bold text-green-500 mt-2">7</h2>
+            <h2 class="text-3xl font-bold text-green-500 mt-2">{{ $totalKembali }}</h2>
+        </div>
+
+        <!-- STOK KRITIS -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
+            <p class="text-gray-500 text-sm">Stok Kritis</p>
+            <h2 class="text-3xl font-bold mt-2 {{ $stokKritis > 0 ? 'text-red-500' : 'text-gray-800' }}">
+                {{ $stokKritis }}
+            </h2>
+            <p class="text-xs text-gray-400 mt-1">Barang di bawah batas minimum</p>
+        </div>
+
+        <!-- PENDING -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
+            <p class="text-gray-500 text-sm">Menunggu Approve</p>
+            <h2 class="text-3xl font-bold mt-2 {{ $totalPending > 0 ? 'text-yellow-500' : 'text-gray-800' }}">
+                {{ $totalPending }}
+            </h2>
+            <p class="text-xs text-gray-400 mt-1">Pengajuan peminjaman pending</p>
         </div>
 
     </div>
@@ -48,7 +66,9 @@
                 Statistik Peminjaman
             </h3>
 
-            <canvas id="chartPeminjaman"></canvas>
+            <canvas id="chartPeminjaman" data-labels="{{ json_encode($chartLabels) }}"
+                data-values="{{ json_encode($chartValues) }}">
+            </canvas>
         </div>
 
         <!-- ACTIVITY -->
@@ -58,10 +78,18 @@
             </h3>
 
             <ul class="space-y-3 text-sm text-gray-600">
-                <li>📦 Laptop dipinjam</li>
-                <li>✅ Proyektor dikembalikan</li>
-                <li>➕ Mouse ditambahkan</li>
-                <li>📦 Keyboard dipinjam</li>
+                @forelse($peminjamanPending as $p)
+                <li class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-yellow-400"></span>
+                    <span>
+                        <span class="font-medium">{{ $p->user->name ?? '-' }}</span>
+                        mengajukan pinjam
+                        <span class="font-medium">{{ $p->item->nama_barang ?? '-' }}</span>
+                    </span>
+                </li>
+                @empty
+                <li class="text-gray-400">Tidak ada pengajuan pending</li>
+                @endforelse
             </ul>
         </div>
 
@@ -70,42 +98,7 @@
 </div>
 
 <!-- CHART SCRIPT -->
-<script>
-    const ctx = document.getElementById('chartPeminjaman');
-
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum'],
-            datasets: [{
-                label: 'Peminjaman',
-                data: [3, 5, 2, 8, 6],
-                borderColor: '#f97316', // ORANGE
-                backgroundColor: 'rgba(249,115,22,0.15)',
-                tension: 0.4,
-                fill: true
-            }]
-        },
-        options: {
-            plugins: {
-                legend: {
-                    labels: {
-                        color: '#374151'
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    ticks: { color: '#6b7280' },
-                    grid: { color: '#e5e7eb' }
-                },
-                y: {
-                    ticks: { color: '#6b7280' },
-                    grid: { color: '#e5e7eb' }
-                }
-            }
-        }
-    });
-</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ asset('js/chart-init.js') }}"></script>
 
 @endsection

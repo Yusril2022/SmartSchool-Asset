@@ -9,12 +9,29 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BorrowingController;
 use App\Http\Controllers\UserController;
-use App\Models\Borrowing;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+// =========================================================
+// 🌐 PUBLIC — Tidak perlu login sama sekali
+// =========================================================
+
+// Scan QR → detail barang
+// Aset     → tombol "Login dulu untuk pinjam"
+// Konsumsi → tombol "Ambil Sekarang" ke form publik
+Route::get('/scan/{kode}', [ItemController::class, 'scan'])
+    ->name('items.scan');
+
+// Form pengambilan konsumsi tanpa login
+Route::get('/ambil/{kode}', [ItemUsageController::class, 'formPublic'])
+    ->name('ambil.form');
+Route::post('/ambil', [ItemUsageController::class, 'storePublic'])
+    ->name('ambil.store');
+Route::get('/ambil/{kode}/sukses', [ItemUsageController::class, 'sukses'])
+    ->name('ambil.sukses');
 
 // =========================================================
 // 🔵 SEMUA USER YANG SUDAH LOGIN
@@ -28,9 +45,10 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // QR scan — semua user bisa scan
-    Route::get('/scan/{kode}', [ItemController::class, 'scan'])
-        ->name('items.scan');
+    // Halaman kamera scan QR — semua role bisa akses (admin, siswa, guru)
+    Route::get('/scan-barang', function () {
+        return view('user.scan');
+    })->name('scan.barang');
 });
 
 // =========================================================
@@ -38,17 +56,14 @@ Route::middleware(['auth'])->group(function () {
 // =========================================================
 Route::middleware(['auth', 'role:admin'])->group(function () {
 
-    // Master data
     Route::resource('users', UserController::class);
     Route::resource('rooms', RoomController::class);
     Route::resource('cabinets', CabinetController::class);
     Route::resource('items', ItemController::class);
 
-    // Barang masuk (hanya admin yang bisa input)
     Route::resource('incoming-items', IncomingItemController::class)
         ->only(['index', 'create', 'store']);
 
-    // Peminjaman — admin lihat semua & bisa approve/tolak/kembalikan
     Route::resource('admin/borrowings', BorrowingController::class)
         ->only(['index', 'show', 'update'])
         ->names([
@@ -59,11 +74,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 });
 
 // =========================================================
-// 🟢 USER BIASA (siswa DAN guru bisa akses)
+// 🟢 USER BIASA (siswa DAN guru)
 // =========================================================
 Route::middleware(['auth', 'role:siswa,guru'])->group(function () {
 
-    // Lihat daftar barang
     Route::get('/catalog', [ItemController::class, 'userIndex'])
         ->name('items.user');
     Route::get('/catalog/{id}', [ItemController::class, 'showUser'])
@@ -75,18 +89,13 @@ Route::middleware(['auth', 'role:siswa,guru'])->group(function () {
     Route::resource('borrowings', BorrowingController::class)
         ->only(['index', 'store', 'show']);
 
-    // Pengambilan barang KONSUMSI
+    // Pengambilan barang KONSUMSI (login)
     Route::get('/item-usages/{id}', [ItemUsageController::class, 'create'])
         ->name('item-usages.create');
     Route::post('/item-usages', [ItemUsageController::class, 'store'])
         ->name('item-usages.store');
     Route::get('/item-usages', [ItemUsageController::class, 'index'])
         ->name('item-usages.index');
-
-    // Halaman scan QR
-    Route::get('/scan-barang', function () {
-        return view('user.scan');
-    })->name('scan.barang');
 });
 
 require __DIR__ . '/auth.php';

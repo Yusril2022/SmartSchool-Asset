@@ -15,17 +15,20 @@ class ItemService
             $fotoPath = $foto->store('items', 'public');
         }
 
-        return Item::create([
-            'kode_barang'   => $data['kode_barang'] ?? 'ITM-' . strtoupper(uniqid()),
-            'nama_barang'   => $data['nama_barang'],
-            'kategori'      => $data['kategori'],
-            'stok_awal'     => $data['stok_awal'],
-            'id_lemari'     => $data['id_lemari'],
-            'jenis_barang'  => $data['jenis_barang'],
-            'batas_minimum' => $data['batas_minimum'] ?? 0,
-            'harga'         => $data['harga'] ?? 0,
-            'foto'          => $fotoPath,  // ← tambah ini
-        ]);
+    return Item::create([
+        'kode_barang'     => $data['kode_barang'] ?? 'ITM-' . strtoupper(uniqid()),
+        'nama_barang'     => $data['nama_barang'],
+        'kategori'        => $data['kategori'],
+        'stok_awal'       => $data['stok_awal'],
+        'stok_total'      => $data['stok_awal'], 
+        'id_lemari'       => $data['id_lemari'],
+        'jenis_barang'    => $data['jenis_barang'],
+        'merk'            => $data['merk'] ?? null,
+        'hasil_perolehan' => $data['hasil_perolehan'] ?? null,
+        'batas_minimum'   => $data['batas_minimum'] ?? 0,
+        'harga'           => $data['harga'] ?? 0,
+        'foto'            => $fotoPath,
+    ]);
     }
 
 

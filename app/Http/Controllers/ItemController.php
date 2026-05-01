@@ -27,8 +27,6 @@ class ItemController extends Controller
 
     public function create()
     {
-        // dulu: Lemari
-        // sekarang: Cabinet
         $lemaris = Cabinet::with('room')->get();
 
         return view('admin.items.create', compact('lemaris'));
@@ -36,26 +34,26 @@ class ItemController extends Controller
 
     public function store(Request $request)
     {
-
         $request->validate([
-        'nama_barang'   => 'required|string|max:255',
-        'kategori'      => 'required|string|max:255',
-        'jenis_barang'  => 'required|in:aset,konsumsi',
-        'id_lemari'     => 'required|exists:cabinets,id',
-        'stok_awal'     => 'required|integer|min:0',
-        'batas_minimum' => 'required|integer|min:0',
-        'harga'         => 'required|integer|min:0',
-        'foto'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'nama_barang'     => 'required|string|max:255',
+            'kategori'        => 'required|string|max:255',
+            'jenis_barang'    => 'required|in:aset,konsumsi',
+            'merk'            => 'nullable|string|max:255',
+            'hasil_perolehan' => 'nullable|in:pembelian,hibah,sumbangan,dana_bos',
+            'id_lemari'       => 'required|exists:cabinets,id',
+            'stok_awal'       => 'required|integer|min:0',
+            'batas_minimum'   => 'required|integer|min:0',
+            'harga'           => 'required|integer|min:0',
+            'foto'            => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-    try {
-        $this->service->store($request->all(), $request->file('foto'));
-        //                                      ↑ kirim file foto ke service
+        try {
+            $this->service->store($request->all(), $request->file('foto'));
 
-        return redirect()->route('items.index')
-            ->with('success', 'Barang berhasil ditambahkan');
-    } catch (\Exception $e) {
-        return back()->withInput()->with('error', $e->getMessage());
+            return redirect()->route('items.index')
+                ->with('success', 'Barang berhasil ditambahkan');
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', $e->getMessage());
         }
     }
 
@@ -63,16 +61,15 @@ class ItemController extends Controller
     {
         $barang = Item::findOrFail($id);
 
-    $request->validate([
-        'nama_barang'   => 'required|string|max:255',
-        'kategori'      => 'required|string|max:255',
-        'jenis_barang'  => 'required|in:aset,konsumsi',
-        'id_lemari'     => 'required|exists:cabinets,id',
-        'batas_minimum' => 'required|integer|min:0',
-        'harga'         => 'required|integer|min:0',
-        'foto'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        // stok_awal tidak ada di sini — tidak boleh diubah setelah dibuat
-    ]);
+        $request->validate([
+            'nama_barang'   => 'required|string|max:255',
+            'kategori'      => 'required|string|max:255',
+            'jenis_barang'  => 'required|in:aset,konsumsi',
+            'id_lemari'     => 'required|exists:cabinets,id',
+            'batas_minimum' => 'required|integer|min:0',
+            'harga'         => 'required|integer|min:0',
+            'foto'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
 
         try {
             $this->service->update($barang, $request->all(), $request->file('foto'));
@@ -117,22 +114,22 @@ class ItemController extends Controller
 
     // ================= SCAN =================
 
-
-
+    /**
+     * Dipanggil saat QR di-scan.
+     * Route: GET /scan/{kode}  → PUBLIC (tidak perlu login)
+     *
+     * Menampilkan halaman detail barang.
+     * Tombol aksi (pinjam / ambil) hanya muncul kalau user sudah login.
+     */
     public function scan($kode)
     {
-        $barang = Item::where('kode_barang', $kode)->first();
+        $barang = Item::with('cabinet.room')->where('kode_barang', $kode)->first();
 
         if (!$barang) {
-            return back()->with('error', 'Barang tidak ditemukan');
+            abort(404, 'Barang dengan kode ' . $kode . ' tidak ditemukan.');
         }
 
-            if ($barang->jenis_barang === 'aset') {
-            return redirect()->route('borrowings.create', $barang->id);
-        }
-
-        // konsumsi → ke halaman pengambilan
-        return redirect()->route('item-usages.create', $barang->id);
+        return view('scan.detail', compact('barang'));
     }
 
     public function edit($id)
