@@ -1,109 +1,129 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="p-6 min-h-screen bg-gray-50/50">
 
-    <div class="space-y-6">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-800">Data Peminjaman</h1>
-                <p class="text-gray-500 text-sm">Kelola proses peminjaman dan pengembalian barang</p>
-            </div>
-        </div>
+<div class="space-y-6">
 
-        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-gray-700 whitespace-nowrap">
-                    <thead class="bg-gray-50 border-b border-gray-200 text-gray-500 text-xs uppercase tracking-wider">
-                        <tr>
-                            <th class="px-6 py-4 text-left font-semibold">User</th>
-                            <th class="px-6 py-4 text-left font-semibold">Barang</th>
-                            <th class="px-6 py-4 text-left font-semibold">Jumlah</th>
-                            <th class="px-6 py-4 text-left font-semibold">Tanggl Pinjam</th>
-                            <th class="px-6 py-4 text-left font-semibold">Tanggl Kembali</th>
-                            <th class="px-6 py-4 text-left font-semibold">Status</th>
-                            <th class="px-6 py-4 text-center font-semibold">Aksi</th>
-                        </tr>
-                    </thead>
-
-                    <tbody class="divide-y divide-gray-100">
-                        @foreach($data as $item)
-                        <tr class="hover:bg-gray-50/80 transition-colors">
-                            <td class="px-6 py-4">
-                                <div class="font-medium text-gray-900">{{ $item->user->name ?? '-' }}</div>
-                            </td>
-                            <td class="px-6 py-4 text-gray-600">
-                                {{ $item->item->nama_barang ?? '-' }}
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-semibold">
-                                    {{ $item->jumlah_pinjam }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-gray-600">
-                                {{ \Carbon\Carbon::parse($item->tanggal_peminjaman)->format('d M Y') }}
-                            </td>
-                            <td class="px-6 py-4">
-                                @if($item->tanggal_kembali)
-                                <span
-                                    class="text-gray-600">{{ \Carbon\Carbon::parse($item->tanggal_kembali)->format('d M Y') }}</span>
-                                @else
-                                <span class="text-gray-400 italic text-xs">Belum kembali</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4">
-                                @php
-                                $statusClasses = [
-                                'pending' => 'bg-yellow-100 text-yellow-700 border-yellow-200',
-                                'dipinjam' => 'bg-blue-100 text-blue-700 border-blue-200',
-                                'dikembalikan' => 'bg-green-100 text-green-700 border-green-200',
-                                'ditolak' => 'bg-red-100 text-red-700 border-red-200',
-                                ];
-                                $class = $statusClasses[$item->status] ?? 'bg-gray-100 text-gray-600';
-                                @endphp
-                                <span class="px-3 py-1 rounded-full text-[11px] font-bold border {{ $class }}">
-                                    {{ strtoupper($item->status) }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="flex justify-center items-center gap-2">
-                                    @if($item->status == 'pending')
-                                    <form action="{{ route('admin.borrowings.update', $item->id) }}" method="POST">
-                                        @csrf @method('PUT')
-                                        <input type="hidden" name="action" value="approve">
-                                        <button
-                                            class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition shadow-sm">
-                                            Approve
-                                        </button>
-                                    </form>
-                                    <form action="{{ route('admin.borrowings.update', $item->id) }}" method="POST">
-                                        @csrf @method('PUT')
-                                        <input type="hidden" name="action" value="tolak">
-                                        <button onclick="return confirm('Tolak peminjaman ini?')"
-                                            class="bg-white border border-red-200 text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg text-xs font-medium transition">
-                                            Tolak
-                                        </button>
-                                    </form>
-                                    @elseif($item->status == 'dipinjam')
-                                    <form action="{{ route('admin.borrowings.update', $item->id) }}" method="POST">
-                                        @csrf @method('PUT')
-                                        <input type="hidden" name="action" value="kembali">
-                                        <button
-                                            class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition shadow-sm">
-                                            Kembalikan
-                                        </button>
-                                    </form>
-                                    @else
-                                    <span class="text-gray-400 text-xs">-</span>
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
+    {{-- HEADER --}}
+    <div>
+        <h1 class="text-2xl font-semibold text-gray-800">Manajemen Peminjaman</h1>
+        <p class="text-gray-500 text-sm">Kelola seluruh pengajuan peminjaman barang</p>
     </div>
+
+    {{-- FLASH --}}
+    @if (session('success'))
+    <div class="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">
+        ✅ {{ session('success') }}
+    </div>
+    @endif
+    @if (session('error'))
+    <div class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+        ⚠️ {{ session('error') }}
+    </div>
+    @endif
+
+    {{-- FILTER STATUS --}}
+    <div class="flex flex-wrap gap-2">
+        @php
+        $statuses = ['semua' => 'Semua', 'pending' => '⏳ Pending', 'dipinjam' => '📦 Dipinjam', 'dikembalikan' => '✅
+        Dikembalikan', 'ditolak' => '❌ Ditolak'];
+        $aktif = request('status', 'semua');
+        @endphp
+        @foreach ($statuses as $val => $label)
+        <a href="{{ request()->fullUrlWithQuery(['status' => $val]) }}" class="px-4 py-1.5 rounded-full text-xs font-medium border transition
+               {{ $aktif === $val
+                   ? 'bg-orange-500 text-white border-orange-500'
+                   : 'bg-white text-gray-600 border-gray-200 hover:border-orange-300' }}">
+            {{ $label }}
+        </a>
+        @endforeach
+    </div>
+
+    {{-- TABLE --}}
+    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+        <table class="w-full text-sm text-gray-700">
+
+            <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
+                <tr>
+                    <th class="px-6 py-4 text-left">Kode</th>
+                    <th class="px-6 py-4 text-left">Peminjam</th>
+                    <th class="px-6 py-4 text-left">Barang</th>
+                    <th class="px-6 py-4 text-left">Jumlah</th>
+                    <th class="px-6 py-4 text-left">Tgl Pinjam</th>
+                    <th class="px-6 py-4 text-left">Status</th>
+                    <th class="px-6 py-4 text-center">Aksi</th>
+                </tr>
+            </thead>
+
+            <tbody class="divide-y divide-gray-100">
+                @forelse ($data as $p)
+                <tr class="hover:bg-gray-50 transition">
+
+                    <td class="px-6 py-4 font-mono text-xs text-gray-500">
+                        {{ $p->kode_peminjaman }}
+                    </td>
+
+                    <td class="px-6 py-4">
+                        <div class="font-medium text-gray-800">{{ $p->user->name ?? '-' }}</div>
+                        <div class="text-xs text-gray-400">{{ $p->user->email ?? '' }}</div>
+                    </td>
+
+                    <td class="px-6 py-4">
+                        <div class="font-medium text-gray-800">{{ $p->item->nama_barang ?? '-' }}</div>
+                        <div class="text-xs text-gray-400">{{ $p->item->kode_barang ?? '' }}</div>
+                    </td>
+
+                    <td class="px-6 py-4 text-gray-600">
+                        {{ $p->jumlah_pinjam }}
+                    </td>
+
+                    <td class="px-6 py-4 text-xs text-gray-500">
+                        {{ \Carbon\Carbon::parse($p->tanggal_peminjaman)->format('d M Y') }}
+                    </td>
+
+                    <td class="px-6 py-4">
+                        @php
+                        $badge = match($p->status) {
+                        'pending' => 'bg-yellow-100 text-yellow-600',
+                        'dipinjam' => 'bg-orange-100 text-orange-600',
+                        'dikembalikan' => 'bg-green-100 text-green-600',
+                        'ditolak' => 'bg-red-100 text-red-500',
+                        default => 'bg-gray-100 text-gray-500',
+                        };
+                        @endphp
+                        <span class="px-3 py-1 rounded-full text-xs font-medium {{ $badge }}">
+                            {{ ucfirst($p->status) }}
+                        </span>
+                    </td>
+
+                    <td class="px-6 py-4 text-center">
+                        <a href="{{ route('admin.borrowings.show', $p->id) }}"
+                            class="px-3 py-1.5 rounded-lg bg-orange-50 text-orange-500 hover:bg-orange-100 transition text-xs font-medium">
+                            Detail →
+                        </a>
+                    </td>
+
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="7" class="text-center py-14 text-gray-400">
+                        <div class="text-4xl mb-2">📄</div>
+                        <p>Tidak ada data peminjaman</p>
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+
+        </table>
+    </div>
+
+    {{-- PAGINATION --}}
+    @if ($data->hasPages())
+    <div class="flex justify-center">
+        {{ $data->links() }}
+    </div>
+    @endif
+
 </div>
+
 @endsection

@@ -34,4 +34,9 @@ class Borrowing extends Model
     {
         return $this->belongsTo(Item::class, 'id_barang');
     }
+
+    public function documents()
+    {
+        return $this->hasMany(Document::class, 'id_peminjaman');
+    }
 }

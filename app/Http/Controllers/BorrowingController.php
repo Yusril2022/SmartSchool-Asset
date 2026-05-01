@@ -14,16 +14,22 @@ class BorrowingController extends Controller
     // =========================================================
     // LIST — beda tampilan untuk admin vs user
     // =========================================================
-    public function index()
+public function index()
 {
     if (auth()->user()->role === 'admin') {
-        $data = Borrowing::with(['item', 'user'])
-            ->latest()
-            ->paginate(15);
+
+        $query = Borrowing::with(['item', 'user'])->latest();
+
+        if (request('status') && request('status') !== 'semua') {
+            $query->where('status', request('status'));
+        }
+
+        $data = $query->paginate(15);
 
         return view('admin.borrowings.index', compact('data'));
     }
 
+ 
     $data = Borrowing::with('item')
         ->where('id_user', auth()->id())
         ->latest()
