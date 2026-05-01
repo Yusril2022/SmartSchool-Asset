@@ -9,12 +9,20 @@ class Document extends Model
     protected $table = 'documents';
 
     protected $fillable = [
-        'id_barang',
-        'id_peminjaman',
-        'uploaded_by',
-        'file_path',
-        'jenis_dokumen',
-        'keterangan',
+    'uploaded_by',
+    'id_barang',
+    'id_peminjaman',
+    'judul_dokumen',
+    'jenis_dokumen',
+    'no_dokumen',
+    'tanggal_dokumen',
+    'pihak_terkait',
+    'file_path',
+    'keterangan',
+    ];
+
+    protected $casts = [
+        'tanggal_dokumen' => 'date',
     ];
 
     // Barang yang terkait dokumen ini

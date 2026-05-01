@@ -10,6 +10,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BorrowingController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\PublicItemUsageController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -19,18 +21,15 @@ Route::get('/', function () {
 // 🌐 PUBLIC — Tidak perlu login sama sekali
 // =========================================================
 
-// Scan QR → detail barang
-// Aset     → tombol "Login dulu untuk pinjam"
-// Konsumsi → tombol "Ambil Sekarang" ke form publik
 Route::get('/scan/{kode}', [ItemController::class, 'scan'])
     ->name('items.scan');
 
 // Form pengambilan konsumsi tanpa login
-Route::get('/ambil/{kode}', [ItemUsageController::class, 'formPublic'])
+Route::get('/ambil', [ItemUsageController::class, 'formPublic'])
     ->name('ambil.form');
 Route::post('/ambil', [ItemUsageController::class, 'storePublic'])
     ->name('ambil.store');
-Route::get('/ambil/{kode}/sukses', [ItemUsageController::class, 'sukses'])
+Route::get('/ambil/sukses', [ItemUsageController::class, 'sukses'])
     ->name('ambil.sukses');
 
 // =========================================================
@@ -71,6 +70,15 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
             'show'   => 'admin.borrowings.show',
             'update' => 'admin.borrowings.update',
         ]);
+
+    Route::get('admin/item-usages', [ItemUsageController::class, 'adminIndex'])
+    ->name('admin.item-usages.index');
+
+    Route::resource('documents', DocumentController::class)
+        ->only(['index', 'create', 'store',  'show', 'destroy']);
+
+    Route::get('documents/{document}/download', [DocumentController::class, 'download'])
+        ->name('documents.download');
 });
 
 // =========================================================

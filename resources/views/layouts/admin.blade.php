@@ -107,6 +107,22 @@
                     <span x-show="!collapse">Peminjaman</span>
                 </a>
 
+                <a href="{{ route('admin.item-usages.index') }}" class="flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition
+                {{ request()->routeIs('admin.item-usages.*') 
+                ? 'bg-orange-500 text-white shadow' 
+                : 'text-gray-600 hover:bg-gray-100' }}">
+                    <span>📋</span>
+                    <span x-show="!collapse">Pengambilan</span>
+                </a>
+
+                <a href="{{ route('documents.index') }}" class="flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition
+                {{ request()->routeIs('documents.*') 
+                ? 'bg-orange-500 text-white shadow' 
+                : 'text-gray-600 hover:bg-gray-100' }}">
+                    <span>📁</span>
+                    <span x-show="!collapse">Dokumen</span>
+                </a>
+
                 <a href="{{ route('users.index') }}" class="flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition
                 {{ request()->routeIs('users.*') 
                 ? 'bg-orange-500 text-white shadow' 
@@ -114,6 +130,8 @@
                     <span>👥</span>
                     <span x-show="!collapse">Users</span>
                 </a>
+
+
 
                 @endif
 

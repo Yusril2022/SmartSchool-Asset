@@ -56,22 +56,53 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
         <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
-            <p class="text-gray-500 text-sm">Total Barang</p>
-            <h2 class="text-2xl font-bold text-gray-800 mt-1">120</h2>
-        </div>
-
-        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
             <p class="text-gray-500 text-sm">Sedang Dipinjam</p>
-            <h2 class="text-2xl font-bold text-orange-500 mt-1">5</h2>
+            <h2 class="text-2xl font-bold text-orange-500 mt-1">{{ $totalPinjamSaya }}</h2>
         </div>
 
         <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
-            <p class="text-gray-500 text-sm">Dikembalikan</p>
-            <h2 class="text-2xl font-bold text-green-500 mt-1">10</h2>
+            <p class="text-gray-500 text-sm">Menunggu Approve</p>
+            <h2 class="text-2xl font-bold text-yellow-500 mt-1">{{ $totalPendingSaya }}</h2>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+            <p class="text-gray-500 text-sm">Sudah Dikembalikan</p>
+            <h2 class="text-2xl font-bold text-green-500 mt-1">{{ $totalKembaliSaya }}</h2>
         </div>
 
     </div>
 
+    @if($peminjamanSaya->count() > 0)
+    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <h3 class="font-medium text-gray-800">Peminjaman Terbaru</h3>
+        </div>
+        <table class="w-full text-sm text-gray-700">
+            <tbody class="divide-y divide-gray-100">
+                @foreach($peminjamanSaya as $p)
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-3 font-medium">{{ $p->item->nama_barang ?? '-' }}</td>
+                    <td class="px-6 py-3 text-gray-500">{{ $p->jumlah_pinjam }} unit</td>
+                    <td class="px-6 py-3">
+                        @php
+                        $badge = match($p->status) {
+                        'pending' => 'bg-yellow-100 text-yellow-700',
+                        'dipinjam' => 'bg-blue-100 text-blue-700',
+                        'dikembalikan' => 'bg-green-100 text-green-700',
+                        'ditolak' => 'bg-red-100 text-red-700',
+                        default => 'bg-gray-100 text-gray-600',
+                        };
+                        @endphp
+                        <span class="px-2 py-1 rounded-full text-xs font-medium {{ $badge }}">
+                            {{ ucfirst($p->status) }}
+                        </span>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+    @endif
 
     <!-- NOTICE -->
     <div class="bg-orange-50 border border-orange-200 rounded-2xl p-5 text-sm text-orange-700">

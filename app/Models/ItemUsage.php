@@ -10,8 +10,9 @@ class ItemUsage extends Model
 
     protected $fillable = [
         'id_barang',
-        'id_user',          // null kalau pengambil tidak login (konsumsi publik)
-        'nama_pengambil',   // diisi manual kalau tidak login
+        'id_user',          
+        'nama_pengambil',
+        'sebagai',   
         'jumlah_ambil',
         'tanggal_ambil',
     ];

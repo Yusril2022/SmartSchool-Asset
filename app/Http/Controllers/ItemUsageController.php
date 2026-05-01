@@ -25,6 +25,43 @@ class ItemUsageController extends Controller
         return view('user.item-usages.index', compact('data'));
     }
 
+    public function adminIndex(Request $request)
+    {
+        $query = ItemUsage::with(['item', 'user'])->latest();
+
+        // Filter tanggal
+        if ($request->dari) {
+            $query->whereDate('tanggal_ambil', '>=', $request->dari);
+        }
+        if ($request->sampai) {
+            $query->whereDate('tanggal_ambil', '<=', $request->sampai);
+        }
+
+        // Filter nama pengambil
+        if ($request->nama) {
+            $query->where('nama_pengambil', 'like', '%' . $request->nama . '%');
+        }
+
+        // Filter barang
+        if ($request->barang) {
+            $query->where('id_barang', $request->barang);
+        }
+
+        $data         = $query->paginate(15)->withQueryString();
+        $totalDiambil = $query->sum('jumlah_ambil');
+        $totalMurid   = $query->where('sebagai', 'murid')->count();
+        $totalPegawai = $query->where('sebagai', 'pegawai')->count();
+        $items        = \App\Models\Item::konsumsi()->orderBy('nama_barang')->get();
+
+        return view('admin.item-usages.index', compact(
+            'data',
+            'totalDiambil',
+            'totalMurid',
+            'totalPegawai',
+            'items',
+        ));
+    }
+
     public function create($id)
     {
         $item = Item::findOrFail($id);
@@ -56,6 +93,8 @@ class ItemUsageController extends Controller
             ItemUsage::create([
                 'id_barang'     => $item->id,
                 'id_user'       => auth()->id(),
+                'nama_pengambil' => auth()->user()->name,
+                'sebagai'       => $validated['sebagai'],
                 'jumlah_ambil'  => $validated['jumlah_ambil'],
                 'tanggal_ambil' => now(),
             ]);
@@ -76,20 +115,15 @@ class ItemUsageController extends Controller
      * Form pengambilan publik — dipanggil dari halaman scan QR barang konsumsi.
      * Route: GET /ambil/{kode}
      */
-    public function formPublic($kode)
-    {
-        $item = Item::where('kode_barang', $kode)->first();
+public function formPublic()
+{
+    $items = Item::konsumsi()
+        ->where('stok_total', '>', 0)
+        ->orderBy('nama_barang')
+        ->get();
 
-        if (!$item) {
-            abort(404, 'Barang tidak ditemukan.');
-        }
-
-        if ($item->jenis_barang !== 'konsumsi') {
-            abort(403, 'Barang ini adalah aset. Gunakan fitur peminjaman.');
-        }
-
-        return view('scan.consumption-form', compact('item'));
-    }
+    return view('public.consumption-form', compact('items'));
+}
 
     /**
      * Proses pengambilan publik — tidak butuh login.
@@ -100,9 +134,11 @@ class ItemUsageController extends Controller
         $validated = $request->validate([
             'id_barang'      => 'required|exists:items,id',
             'nama_pengambil' => 'required|string|max:255',
+            'sebagai'        => 'required|in:murid,pegawai',
             'jumlah_ambil'   => 'required|integer|min:1',
         ], [
             'nama_pengambil.required' => 'Nama pengambil wajib diisi.',
+            'sebagai.required'        => 'Sebagai wajib diisi.',
             'jumlah_ambil.required'   => 'Jumlah wajib diisi.',
             'jumlah_ambil.min'        => 'Jumlah minimal 1.',
         ]);
@@ -124,7 +160,7 @@ class ItemUsageController extends Controller
                 'tanggal_ambil'  => now(),
             ]);
 
-            return redirect()->route('ambil.sukses', $item->kode_barang);
+            return redirect()->route('ambil.sukses');
 
         } catch (\Exception $e) {
             return back()->withInput()->with('error', $e->getMessage());
@@ -135,10 +171,8 @@ class ItemUsageController extends Controller
      * Halaman sukses setelah pengambilan publik.
      * Route: GET /ambil/{kode}/sukses
      */
-    public function sukses($kode)
+    public function sukses()
     {
-        $item = Item::where('kode_barang', $kode)->firstOrFail();
-
-        return view('scan.sucses', compact('item'));
+        return view('public.success');
     }
 }

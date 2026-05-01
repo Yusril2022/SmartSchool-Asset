@@ -27,12 +27,16 @@ class DocumentService
         Storage::disk('public')->put($filePath, $pdf->output());
 
         return Document::create([
-            'id_barang'     => $borrowing->id_barang,
-            'id_peminjaman' => $borrowing->id,
-            'uploaded_by'   => $borrowing->id_admin,
-            'file_path'     => $filePath,
-            'jenis_dokumen' => 'berita_acara',
-            'keterangan'    => 'Auto-generated saat approve peminjaman ' . $borrowing->kode_peminjaman,
+            'uploaded_by'     => $borrowing->id_admin,
+            'id_barang'       => $borrowing->id_barang,
+            'id_peminjaman'   => $borrowing->id,
+            'judul_dokumen'   => 'Berita Acara Peminjaman ' . $borrowing->item->nama_barang,
+            'jenis_dokumen'   => 'Berita Acara Peminjaman',
+            'no_dokumen'      => 'BA-' . $borrowing->kode_peminjaman,
+            'tanggal_dokumen' => now()->toDateString(),
+            'pihak_terkait'   => $borrowing->user->name,
+            'file_path'       => $filePath,
+            'keterangan'      => 'Auto-generated saat approve peminjaman ' . $borrowing->kode_peminjaman,
         ]);
     }
 

@@ -68,12 +68,11 @@
 
                 </div>
 
-                <!-- QR CODE (PUTIH BIAR SCANABLE) -->
-                <div class="flex justify-center mt-4 bg-white p-3 rounded-lg border">
+                <!-- <div class="flex justify-center mt-4 bg-white p-3 rounded-lg border">
                     {!! QrCode::size(110)
                     ->margin(1)
                     ->generate(url('/scan/' . $barang->kode_barang)) !!}
-                </div>
+                </div> -->
 
             </div>
 

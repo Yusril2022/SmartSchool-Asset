@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\User;
+use App\Models\ItemUsage;
 use App\Models\Item;
 use App\Models\Borrowing;
 use App\Models\IncomingItem;
@@ -64,15 +65,25 @@ public function index()
         ->take(5)
         ->get();
 
-    $riwayatAmbil = \App\Models\ItemUsage::with('item')
+    $riwayatAmbil = ItemUsage::with('item')
         ->where('id_user', auth()->id())
         ->latest()
         ->take(5)
         ->get();
 
+    $totalPinjamSaya    = Borrowing::where('id_user', auth()->id())
+                        ->where('status', 'dipinjam')->count();
+    $totalKembaliSaya   = Borrowing::where('id_user', auth()->id())
+                        ->where('status', 'dikembalikan')->count();
+    $totalPendingSaya   = Borrowing::where('id_user', auth()->id())
+                        ->where('status', 'pending')->count();
+
     return view('user.dashboard', compact(
         'peminjamanSaya',
         'riwayatAmbil',
+        'totalPinjamSaya',
+        'totalKembaliSaya',
+        'totalPendingSaya',
     ));
 }
 

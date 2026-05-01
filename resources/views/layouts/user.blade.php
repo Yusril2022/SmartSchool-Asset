@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <title>User - Smart Assets</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -61,7 +62,7 @@
 
                 <!-- Barang -->
                 <a href="{{ route('items.user') }}" class="flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition
-               {{ request()->routeIs('barang.user') 
+               {{ request()->routeIs('items.user') 
                ? 'bg-orange-500 text-white shadow' 
                : 'text-gray-600 hover:bg-gray-100' }}">
 
@@ -71,7 +72,7 @@
 
                 <!-- Peminjaman -->
                 <a href="{{ route('borrowings.index') }}" class="flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition
-               {{ request()->routeIs('peminjaman.*') 
+               {{ request()->routeIs('borrowings.*') 
                ? 'bg-orange-500 text-white shadow' 
                : 'text-gray-600 hover:bg-gray-100' }}">
 
