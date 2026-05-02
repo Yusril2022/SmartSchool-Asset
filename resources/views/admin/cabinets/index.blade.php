@@ -12,7 +12,7 @@
                 Data Lemari
             </h1>
             <p class="text-gray-500 text-sm">
-                Kelola data lemari penyimpanan barang
+                Kelola Data Lemari Penyimpanan Barang
             </p>
         </div>
 
