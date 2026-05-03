@@ -14,29 +14,46 @@ class BorrowingController extends Controller
     // =========================================================
     // LIST — beda tampilan untuk admin vs user
     // =========================================================
-public function index()
-{
-    if (auth()->user()->role === 'admin') {
-
-        $query = Borrowing::with(['item', 'user'])->latest();
-
-        if (request('status') && request('status') !== 'semua') {
-            $query->where('status', request('status'));
+    public function index(Request $request)
+    {
+        if (auth()->user()->role === 'admin') {
+    
+            $query = Borrowing::with(['item', 'user'])->latest();
+    
+            // Filter status
+            if ($request->status && $request->status !== 'semua') {
+                $query->where('status', $request->status);
+            }
+    
+            // Filter search nama peminjam
+            if ($request->search) {
+                $query->whereHas('user', function ($q) use ($request) {
+                    $q->where('name', 'like', '%' . $request->search . '%');
+                });
+            }
+    
+            // Filter tanggal dari
+            if ($request->dari) {
+                $query->whereDate('tanggal_peminjaman', '>=', $request->dari);
+            }
+    
+            // Filter tanggal sampai
+            if ($request->sampai) {
+                $query->whereDate('tanggal_peminjaman', '<=', $request->sampai);
+            }
+    
+            $data = $query->paginate(15)->withQueryString();
+    
+            return view('admin.borrowings.index', compact('data'));
         }
-
-        $data = $query->paginate(15);
-
-        return view('admin.borrowings.index', compact('data'));
+    
+        $data = Borrowing::with('item')
+            ->where('id_user', auth()->id())
+            ->latest()
+            ->paginate(10);
+    
+        return view('user.borrowings.index', compact('data'));
     }
-
- 
-    $data = Borrowing::with('item')
-        ->where('id_user', auth()->id())
-        ->latest()
-        ->paginate(10);
-
-    return view('user.borrowings.index', compact('data'));
-}
 
     // =========================================================
     // FORM — hanya tampil untuk barang aset

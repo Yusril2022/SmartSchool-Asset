@@ -16,16 +16,33 @@ class IncomingItemController extends Controller
         $this->service = $service;
     }
 
-            public function index()
-        {
-            $data = IncomingItem::with(['item', 'admin'])
-                ->latest()
-                ->paginate(15);
-
-            return view('admin.incoming-items.index', compact('data'));
+    public function index(Request $request)
+    {
+        $query = IncomingItem::with(['item', 'admin'])->latest();
+    
+        // Filter search nama barang
+        if ($request->search) {
+            $query->whereHas('item', function ($q) use ($request) {
+                $q->where('nama_barang', 'like', '%' . $request->search . '%');
+            });
         }
+    
+        // Filter tanggal dari
+        if ($request->dari) {
+            $query->whereDate('tanggal_masuk', '>=', $request->dari);
+        }
+    
+        // Filter tanggal sampai
+        if ($request->sampai) {
+            $query->whereDate('tanggal_masuk', '<=', $request->sampai);
+        }
+    
+        $data = $query->paginate(15)->withQueryString();
+    
+        return view('admin.incoming-items.index', compact('data'));
+    }
 
-        public function create()
+        public function create(): View
         {
             $items = Item::orderBy('nama_barang')->get();
 

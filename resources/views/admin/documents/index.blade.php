@@ -28,6 +28,48 @@
     </div>
     @endif
 
+    <!-- FILTER -->
+    <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+        <form method="GET" action="{{ route('documents.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+
+            <!-- SEARCH JUDUL -->
+            <div class="md:col-span-2">
+                <label class="block text-xs text-gray-500 mb-1">Cari Dokumen</label>
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Ketik judul dokumen..."
+                    class="w-full px-4 py-2 rounded-lg border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-400">
+            </div>
+
+            <!-- TANGGAL DARI -->
+            <div>
+                <label class="block text-xs text-gray-500 mb-1">Dari Tanggal</label>
+                <input type="date" name="dari" value="{{ request('dari') }}"
+                    class="w-full px-4 py-2 rounded-lg border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-400">
+            </div>
+
+            <!-- TANGGAL SAMPAI -->
+            <div>
+                <label class="block text-xs text-gray-500 mb-1">Sampai Tanggal</label>
+                <input type="date" name="sampai" value="{{ request('sampai') }}"
+                    class="w-full px-4 py-2 rounded-lg border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-400">
+            </div>
+
+            <!-- TOMBOL -->
+            <div class="md:col-span-4 flex justify-end gap-3">
+                @if(request('search') || request('dari') || request('sampai'))
+                <a href="{{ route('documents.index') }}"
+                    class="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-100 transition text-sm">
+                    Reset
+                </a>
+                @endif
+                <button type="submit"
+                    class="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition text-sm">
+                    Filter
+                </button>
+            </div>
+
+        </form>
+    </div>
+
     <!-- TABLE -->
     <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
         <table class="w-full text-sm text-gray-700">

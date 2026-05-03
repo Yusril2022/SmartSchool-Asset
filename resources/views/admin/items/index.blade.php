@@ -18,11 +18,39 @@
 
         <div class="flex gap-3">
 
-            <!-- SEARCH -->
-            <form method="GET" class="w-full md:w-72">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari barang..."
-                    class="w-full px-4 py-2 rounded-lg bg-white border border-gray-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400">
-            </form>
+            <!-- FILTER -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+                <form method="GET" action="{{ route('items.index') }}" class="flex flex-col md:flex-row gap-3">
+
+                    <!-- SEARCH -->
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama barang..."
+                        class="flex-1 px-4 py-2 rounded-lg border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-400">
+
+                    <!-- FILTER JENIS -->
+                    <select name="jenis"
+                        class="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-orange-400">
+                        <option value="semua" {{ request('jenis', 'semua') == 'semua' ? 'selected' : '' }}>Semua Jenis
+                        </option>
+                        <option value="aset" {{ request('jenis') == 'aset'     ? 'selected' : '' }}>Aset</option>
+                        <option value="konsumsi" {{ request('jenis') == 'konsumsi' ? 'selected' : '' }}>Habis Pakai
+                        </option>
+                    </select>
+
+                    <!-- TOMBOL -->
+                    <button type="submit"
+                        class="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition text-sm">
+                        Cari
+                    </button>
+
+                    @if(request('search') || request('jenis'))
+                    <a href="{{ route('items.index') }}"
+                        class="px-5 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-100 transition text-sm">
+                        Reset
+                    </a>
+                    @endif
+
+                </form>
+            </div>
 
             <!-- BUTTON -->
             <a href="{{ route('items.create') }}"
@@ -145,6 +173,12 @@
             </tbody>
 
         </table>
+
+        @if($barangs->hasPages())
+        <div class="px-6 py-4 border-t border-gray-100">
+            {{ $barangs->links() }}
+        </div>
+        @endif
 
     </div>
 

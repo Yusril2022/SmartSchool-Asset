@@ -16,12 +16,27 @@ class DocumentController extends Controller
     // =========================================================
     // LIST — semua dokumen
     // =========================================================
-    public function index()
+    public function index(Request $request)
     {
-        $documents = Document::with(['uploadedBy', 'item', 'borrowing'])
-            ->latest()
-            ->paginate(15);
-
+        $query = Document::with(['uploadedBy', 'item', 'borrowing'])->latest();
+    
+        // Filter search judul dokumen
+        if ($request->search) {
+            $query->where('judul_dokumen', 'like', '%' . $request->search . '%');
+        }
+    
+        // Filter tanggal dari
+        if ($request->dari) {
+            $query->whereDate('tanggal_dokumen', '>=', $request->dari);
+        }
+    
+        // Filter tanggal sampai
+        if ($request->sampai) {
+            $query->whereDate('tanggal_dokumen', '<=', $request->sampai);
+        }
+    
+        $documents = $query->paginate(15)->withQueryString();
+    
         return view('admin.documents.index', compact('documents'));
     }
 

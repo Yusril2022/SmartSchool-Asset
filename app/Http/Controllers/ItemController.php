@@ -18,10 +18,22 @@ class ItemController extends Controller
 
     // ================= ADMIN =================
 
-    public function index()
+    public function index(Request $request)
     {
-        $barangs = Item::with('cabinet.room')->latest()->get();
-
+        $query = Item::with('cabinet.room')->latest();
+    
+        // Filter search nama
+        if ($request->search) {
+            $query->where('nama_barang', 'like', '%' . $request->search . '%');
+        }
+    
+        // Filter jenis barang
+        if ($request->jenis && $request->jenis !== 'semua') {
+            $query->where('jenis_barang', $request->jenis);
+        }
+    
+        $barangs = $query->paginate(15)->withQueryString();
+    
         return view('admin.items.index', compact('barangs'));
     }
 
