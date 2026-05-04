@@ -92,6 +92,12 @@ class ItemController extends Controller
             return back()->with('error', $e->getMessage());
         }
     }
+ 
+    public function downloadQr($id)
+    {
+        $barang = Item::findOrFail($id);
+        return view('admin.items.qr-print', compact('barang'));
+    }
 
     public function destroy($id)
     {

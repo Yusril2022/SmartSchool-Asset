@@ -146,6 +146,12 @@
                                 Edit
                             </a>
 
+                            <!-- QR DOWNLOAD -->
+                            <a href="{{ route('items.qr', $barang->id) }}" target="_blank"
+                                class="px-3 py-1.5 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition text-xs font-medium">
+                                QR
+                            </a>
+
                             <!-- DELETE -->
                             <form action="{{ route('items.destroy', $barang->id) }}" method="POST">
                                 @csrf

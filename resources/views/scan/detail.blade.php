@@ -77,6 +77,12 @@
                 <span class="text-gray-400 font-medium">Harga Satuan</span>
                 <span>Rp {{ number_format($barang->harga, 0, ',', '.') }}</span>
             </div>
+            @if($barang->hasil_perolehan)
+            <div class="flex justify-between">
+                <span class="text-gray-400 font-medium">Perolehan</span>
+                <span>{{ ucfirst(str_replace('_', ' ', $barang->hasil_perolehan)) }}</span>
+            </div>
+            @endif
 
         </div>
 
@@ -87,8 +93,9 @@
 
             {{-- KONSUMSI: langsung ke form publik, tidak perlu login --}}
             @if ($barang->stok_total > 0)
-            <a href="{{ route('ambil.form', $barang->kode_barang) }}"
-                class="block w-full text-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl transition">
+            <a href="{{ route('ambil.form') }}">
+                class="block w-full text-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl
+                transition">
                 📦 Ambil Barang Sekarang
             </a>
             @else
@@ -119,6 +126,10 @@
 
         </div>
 
+    </div>
+
+    <div class="text-center pb-4">
+        <p class="text-xs text-gray-400">Smart School Asset Management System</p>
     </div>
 
 </body>

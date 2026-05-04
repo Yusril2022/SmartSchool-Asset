@@ -72,13 +72,16 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         ]);
 
     Route::get('admin/item-usages', [ItemUsageController::class, 'adminIndex'])
-    ->name('admin.item-usages.index');
+        ->name('admin.item-usages.index');
 
     Route::resource('documents', DocumentController::class)
         ->only(['index', 'create', 'store',  'show', 'destroy']);
 
     Route::get('documents/{document}/download', [DocumentController::class, 'download'])
         ->name('documents.download');
+
+    Route::get('items/{id}/qr', [ItemController::class, 'downloadQr'])
+        ->name('items.qr');
 });
 
 // =========================================================
