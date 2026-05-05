@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\User;
 use App\Models\Document;
 use App\Models\Borrowing;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -11,18 +12,22 @@ class DocumentService
 {
     public function generateBeritaAcara(Borrowing $borrowing): Document
     {
-        $borrowing->loadMissing(['item', 'user', 'admin']);
+        $borrowing->loadMissing(['item.cabinet.room', 'user', 'admin']);
+
+        // Cari penandatangan: Kepala Sekolah → fallback Wakasek Sarpras → null
+        $penandatangan = User::getPenandatangan();
 
         $fileName   = 'berita-acara-' . $borrowing->kode_peminjaman . '.pdf';
-        $folderPath = 'documents/berita-acara';
+        $folderPath = 'admin.documents.official-report';
         $filePath   = $folderPath . '/' . $fileName;
 
-        $pdf = Pdf::loadView('documents.berita-acara', [
-            'borrowing' => $borrowing,
-            'item'      => $borrowing->item,
-            'user'      => $borrowing->user,
-            'admin'     => $borrowing->admin,
-        ]);
+        $pdf = Pdf::loadView('admin.documents.official-report', [
+            'borrowing'     => $borrowing,
+            'item'          => $borrowing->item,
+            'user'          => $borrowing->user,
+            'admin'         => $borrowing->admin,
+            'penandatangan' => $penandatangan,
+        ])->setPaper([0, 0, 609.45, 935.43], 'portrait'); // F4 dalam points
 
         Storage::disk('public')->put($filePath, $pdf->output());
 

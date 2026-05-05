@@ -77,40 +77,6 @@
                         class="w-full px-4 py-2 rounded-lg border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-400">
                 </div>
 
-                <!-- BARANG TERKAIT (opsional) -->
-                <div>
-                    <label class="block text-sm text-gray-600 mb-1">
-                        Barang Terkait <span class="text-gray-400 text-xs">(opsional)</span>
-                    </label>
-                    <select name="id_barang"
-                        class="w-full px-4 py-2 rounded-lg border border-gray-200 text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-orange-400">
-                        <option value="">-- Tidak terkait barang --</option>
-                        @foreach($items as $item)
-                        <option value="{{ $item->id }}" {{ old('id_barang') == $item->id ? 'selected' : '' }}>
-                            {{ $item->nama_barang }} ({{ $item->kode_barang }})
-                        </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- PEMINJAMAN TERKAIT (opsional) -->
-                <div class="md:col-span-2">
-                    <label class="block text-sm text-gray-600 mb-1">
-                        Peminjaman Terkait <span class="text-gray-400 text-xs">(opsional)</span>
-                    </label>
-                    <select name="id_peminjaman"
-                        class="w-full px-4 py-2 rounded-lg border border-gray-200 text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-orange-400">
-                        <option value="">-- Tidak terkait peminjaman --</option>
-                        @foreach($borrowings as $b)
-                        <option value="{{ $b->id }}" {{ old('id_peminjaman') == $b->id ? 'selected' : '' }}>
-                            {{ $b->kode_peminjaman }} —
-                            {{ $b->item->nama_barang ?? '-' }} —
-                            {{ $b->user->name ?? '-' }}
-                        </option>
-                        @endforeach
-                    </select>
-                </div>
-
                 <!-- FILE UPLOAD -->
                 <div class="md:col-span-2">
                     <label class="block text-sm text-gray-600 mb-1">

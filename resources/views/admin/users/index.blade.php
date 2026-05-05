@@ -39,6 +39,7 @@
                     <th class="px-6 py-4 text-left">Email</th>
                     <th class="px-6 py-4 text-left">No HP</th>
                     <th class="px-6 py-4 text-left">Role</th>
+                    <th class="px-6 py-4 text-left">Jabatan</th>
                     <th class="px-6 py-4 text-center">Aksi</th>
                 </tr>
             </thead>
@@ -77,6 +78,16 @@
                         <span class="px-3 py-1 rounded-full text-xs font-medium {{ $roleBadge }}">
                             {{ ucfirst($user->role) }}
                         </span>
+                    </td>
+
+                    <td class="px-6 py-4 text-gray-600 text-xs">
+                        @if ($user->jabatan)
+                        <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full font-medium">
+                            {{ $user->jabatan }}
+                        </span>
+                        @else
+                        <span class="text-gray-300">—</span>
+                        @endif
                     </td>
 
                     <td class="px-6 py-4">

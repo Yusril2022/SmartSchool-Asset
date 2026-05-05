@@ -14,6 +14,7 @@ class Borrowing extends Model
         'id_admin',
         'id_barang',
         'jumlah_pinjam',
+        'tujuan_pinjam',
         'status',
         'tanggal_peminjaman',
         'tanggal_kembali',

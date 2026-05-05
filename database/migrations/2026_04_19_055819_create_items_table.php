@@ -31,6 +31,13 @@ return new class extends Migration
             $table->integer('batas_minimum')->default(0);
             $table->bigInteger('harga')->default(0);
             $table->string('foto')->nullable();
+                         $table->enum('kondisi', [
+                'Baik',
+                'Rusak Ringan',
+                'Rusak Sedang',
+                'Rusak Berat',
+                'Mati Total',
+            ])->default('Baik')->after('foto');
             $table->timestamps();
         });
     }

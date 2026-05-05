@@ -17,6 +17,7 @@ class User extends Authenticatable
         'no_hp',
         'password',
         'role',
+        'jabatan',
     ];
 
     protected $hidden = [
@@ -36,35 +37,38 @@ class User extends Authenticatable
     // HELPERS
     // =========================================================
 
-    // Cek apakah user adalah admin (berguna di Blade: auth()->user()->isAdmin())
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    // Cari penandatangan berita acara:
+    // Utamakan Kepala Sekolah, fallback ke Wakasek Sarpras
+    public static function getPenandatangan(): ?self
+    {
+        return self::where('jabatan', 'Kepala Sekolah')->first()
+            ?? self::where('jabatan', 'Wakasek Sarana dan Prasarana')->first();
     }
 
     // =========================================================
     // RELASI
     // =========================================================
 
-    // Semua peminjaman yang diajukan user ini
     public function borrowings()
     {
         return $this->hasMany(Borrowing::class, 'id_user');
     }
 
-    // Semua peminjaman yang di-approve/tolak oleh user ini (sebagai admin)
     public function approvals()
     {
         return $this->hasMany(Borrowing::class, 'id_admin');
     }
 
-    // Semua barang masuk yang diinput oleh user ini (sebagai admin)
     public function incomingItems()
     {
         return $this->hasMany(IncomingItem::class, 'id_admin');
     }
 
-    // Semua pengambilan barang konsumsi oleh user ini
     public function itemUsages()
     {
         return $this->hasMany(ItemUsage::class, 'id_user');

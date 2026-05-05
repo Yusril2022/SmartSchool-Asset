@@ -6,30 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('incoming_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('id_barang')->constrained('items')->cascadeOnDelete();
-            $table->foreignId('id_user')->nullable()->change();
-            $table->string('nama_pengambil')->nullable()->after('id_user');
+            $table->foreignId('id_user')->constrained('users')->cascadeOnDelete();
             $table->integer('jumlah_masuk');
             $table->timestamp('tanggal_masuk');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-public function down(): void
+    public function down(): void
     {
-        Schema::table('item_usages', function (Blueprint $table) {
-            $table->dropColumn('nama_pengambil');
-            $table->foreignId('id_user')->nullable(false)->change();
-        });
+        Schema::dropIfExists('incoming_items');
     }
 };

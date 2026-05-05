@@ -29,9 +29,10 @@ return new class extends Migration
             $table->foreignId('id_barang')
                   ->constrained('items')
                   ->cascadeOnDelete();
-
+            
             // 🔥 DATA
             $table->integer('jumlah_pinjam');
+            $table->string('tujuan_pinjam')->nullable()->after('jumlah_pinjam');
             $table->string('status')->default('pending');
 
             $table->timestamp('tanggal_peminjaman');

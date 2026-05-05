@@ -38,7 +38,8 @@ class UserController extends Controller
             'no_hp'        => 'required|string|max:15',
             'email'        => 'required|email|unique:users,email',
             'password'     => 'required|min:6',
-            'role'         => 'required|in:admin,guru,siswa', // ✅ validasi role
+            'role'         => 'required|in:admin,guru,siswa',
+            'jabatan'      => 'nullable|in:Kepala Sekolah,Wakasek Sarana dan Prasarana',
         ]);
 
         User::create([
@@ -47,7 +48,8 @@ class UserController extends Controller
             'no_hp'        => $request->no_hp,
             'email'        => $request->email,
             'password'     => Hash::make($request->password),
-            'role'         => $request->role, 
+            'role'         => $request->role,
+            'jabatan'      => $request->jabatan,
         ]);
 
         return redirect()->route('users.index')
@@ -85,7 +87,7 @@ class UserController extends Controller
             'no_hp'       => 'required|string|max:15',
             'email'       => 'required|email|unique:users,email,' . $id,
             'role'        => 'required|in:admin,guru,siswa',
-            // password opsional saat update
+            'jabatan'     => 'nullable|in:Kepala Sekolah,Wakasek Sarana dan Prasarana',
             'password'    => 'nullable|min:6',
         ]);
 
@@ -95,6 +97,7 @@ class UserController extends Controller
             'no_hp'       => $request->no_hp,
             'email'       => $request->email,
             'role'        => $request->role,
+            'jabatan'     => $request->jabatan,
         ];
 
         // Hanya update password kalau diisi

@@ -21,6 +21,7 @@ class Item extends Model
         'batas_minimum',
         'harga',
         'foto',
+        'kondisi',
     ];
 
     protected $casts = [

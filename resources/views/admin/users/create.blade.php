@@ -70,6 +70,25 @@
                     @error('role') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                 </div>
 
+                <!-- JABATAN -->
+                <div>
+                    <label class="block text-sm text-gray-600 mb-1">Jabatan Struktural</label>
+                    <select name="jabatan"
+                        class="w-full px-4 py-2 rounded-lg border border-gray-200 text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-orange-400">
+                        <option value="">-- Tidak Ada --</option>
+                        <option value="Kepala Sekolah" {{ old('jabatan') == 'Kepala Sekolah' ? 'selected' : '' }}>
+                            Kepala Sekolah
+                        </option>
+                        <option value="Wakasek Sarana dan Prasarana"
+                            {{ old('jabatan') == 'Wakasek Sarana dan Prasarana' ? 'selected' : '' }}>
+                            Wakasek Sarana dan Prasarana
+                        </option>
+                    </select>
+                    <p class="text-xs text-gray-400 mt-1">Digunakan sebagai penandatangan berita acara peminjaman aset
+                    </p>
+                    @error('jabatan') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                </div>
+
                 <!-- PASSWORD -->
                 <div>
                     <label class="block text-sm text-gray-600 mb-1">Password <span class="text-red-500">*</span></label>

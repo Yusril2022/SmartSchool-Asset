@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Document;
-use App\Models\Item;
-use App\Models\Borrowing;
 use App\Services\DocumentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -45,13 +43,7 @@ class DocumentController extends Controller
     // =========================================================
     public function create()
     {
-        $items      = Item::orderBy('nama_barang')->get();
-        $borrowings = Borrowing::with(['item', 'user'])
-            ->whereIn('status', ['dipinjam', 'dikembalikan'])
-            ->latest()
-            ->get();
-
-        return view('admin.documents.create', compact('items', 'borrowings'));
+        return view('admin.documents.create');
     }
 
     // =========================================================
@@ -65,10 +57,7 @@ class DocumentController extends Controller
             'no_dokumen'      => 'nullable|string|max:255',
             'tanggal_dokumen' => 'required|date',
             'pihak_terkait'   => 'nullable|string|max:255',
-            'id_barang'       => 'nullable|exists:items,id',
-            'id_peminjaman'   => 'nullable|exists:borrowings,id',
             'file_path'       => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            // max 5MB
             'keterangan'      => 'nullable|string',
         ]);
 
@@ -85,8 +74,8 @@ class DocumentController extends Controller
             'no_dokumen'      => $validated['no_dokumen'] ?? null,
             'tanggal_dokumen' => $validated['tanggal_dokumen'],
             'pihak_terkait'   => $validated['pihak_terkait'] ?? null,
-            'id_barang'       => $validated['id_barang'] ?? null,
-            'id_peminjaman'   => $validated['id_peminjaman'] ?? null,
+            'id_barang'       => null,
+            'id_peminjaman'   => null,
             'file_path'       => $filePath,
             'keterangan'      => $validated['keterangan'] ?? null,
         ]);
