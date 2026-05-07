@@ -11,7 +11,8 @@ use App\Http\Controllers\BorrowingController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DocumentController;
-use App\Http\Controllers\PublicItemUsageController;
+use App\Http\Controllers\AssetPositionController;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -82,6 +83,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::get('items/{id}/qr', [ItemController::class, 'downloadQr'])
         ->name('items.qr');
+    Route::get('asset-position', [AssetPositionController::class, 'index'])
+    ->name('asset-position.index');
+    Route::get('asset-position/print', [AssetPositionController::class, 'print'])
+        ->name('asset-position.print');
 });
 
 // =========================================================

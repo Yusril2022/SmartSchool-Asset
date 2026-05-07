@@ -123,6 +123,14 @@
                     <span x-show="!collapse">Dokumen</span>
                 </a>
 
+                <a href="{{ route('asset-position.index') }}" class="flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition
+                {{ request()->routeIs('asset-position.*') 
+                ? 'bg-orange-500 text-white shadow' 
+                : 'text-gray-600 hover:bg-gray-100' }}">
+                    <span>🗂️</span>
+                    <span x-show="!collapse">Posisi Aset</span>
+                </a>
+
                 <a href="{{ route('users.index') }}" class="flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition
                 {{ request()->routeIs('users.*') 
                 ? 'bg-orange-500 text-white shadow' 
