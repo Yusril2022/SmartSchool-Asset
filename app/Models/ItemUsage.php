@@ -3,16 +3,18 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class ItemUsage extends Model
 {
     protected $table = 'item_usages';
 
     protected $fillable = [
+        'session_id',
         'id_barang',
-        'id_user',          
+        'id_user',
         'nama_pengambil',
-        'sebagai',   
+        'sebagai',
         'jumlah_ambil',
         'tanggal_ambil',
     ];
@@ -21,6 +23,24 @@ class ItemUsage extends Model
         'jumlah_ambil'  => 'integer',
         'tanggal_ambil' => 'datetime',
     ];
+
+    // =========================================================
+    // BOOT — auto generate session_id kalau tidak diisi
+    // =========================================================
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->session_id)) {
+                $model->session_id = (string) Str::uuid();
+            }
+        });
+    }
+
+    // =========================================================
+    // RELASI
+    // =========================================================
 
     public function item()
     {
@@ -32,10 +52,10 @@ class ItemUsage extends Model
         return $this->belongsTo(User::class, 'id_user');
     }
 
-    /**
-     * Nama yang tampil di riwayat — pakai nama user kalau login,
-     * pakai nama_pengambil kalau tidak login.
-     */
+    // =========================================================
+    // COMPUTED
+    // =========================================================
+
     public function getNamaDisplayAttribute(): string
     {
         return $this->user?->name ?? $this->nama_pengambil ?? 'Tidak diketahui';

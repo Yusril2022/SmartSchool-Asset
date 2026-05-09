@@ -10,6 +10,7 @@ class Item extends Model
 
     protected $fillable = [
         'kode_barang',
+        'id_ruangan',
         'id_lemari',
         'nama_barang',
         'kategori',
@@ -51,6 +52,11 @@ class Item extends Model
     // RELASI
     // =========================================================
 
+    // Barang berada di ruangan mana
+    public function room()
+    {
+        return $this->belongsTo(Room::class, 'id_ruangan');
+    }
     // Barang berada di lemari mana
     public function cabinet()
     {

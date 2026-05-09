@@ -132,33 +132,43 @@ public function formPublic()
     public function storePublic(Request $request)
     {
         $validated = $request->validate([
-            'id_barang'      => 'required|exists:items,id',
-            'nama_pengambil' => 'required|string|max:255',
-            'sebagai'        => 'required|in:murid,pegawai',
-            'jumlah_ambil'   => 'required|integer|min:1',
+            'nama_pengambil'          => 'required|string|max:255',
+            'sebagai'                 => 'required|in:murid,pegawai',
+            'items'                   => 'required|array|min:1',
+            'items.*.id_barang'       => 'required|exists:items,id',
+            'items.*.jumlah_ambil'    => 'required|integer|min:1',
         ], [
             'nama_pengambil.required' => 'Nama pengambil wajib diisi.',
-            'sebagai.required'        => 'Sebagai wajib diisi.',
-            'jumlah_ambil.required'   => 'Jumlah wajib diisi.',
-            'jumlah_ambil.min'        => 'Jumlah minimal 1.',
+            'sebagai.required'        => 'Kolom sebagai wajib diisi.',
+            'items.required'          => 'Minimal 1 barang harus dipilih.',
+            'items.*.id_barang.required' => 'Pilih barang di semua baris.',
+            'items.*.jumlah_ambil.min'   => 'Jumlah minimal 1.',
         ]);
 
-        $item = Item::findOrFail($validated['id_barang']);
-
-        if ($item->jenis_barang !== 'konsumsi') {
-            return back()->with('error', 'Barang ini bukan barang konsumsi.');
-        }
+        $sessionId = (string) \Illuminate\Support\Str::uuid();
 
         try {
-            $this->service->kurangiStok($item, $validated['jumlah_ambil']);
+            \Illuminate\Support\Facades\DB::transaction(function () use ($validated, $sessionId) {
+                foreach ($validated['items'] as $row) {
+                    $item = Item::findOrFail($row['id_barang']);
 
-            ItemUsage::create([
-                'id_barang'      => $item->id,
-                'id_user'        => null,                        // tidak login
-                'nama_pengambil' => $validated['nama_pengambil'],
-                'jumlah_ambil'   => $validated['jumlah_ambil'],
-                'tanggal_ambil'  => now(),
-            ]);
+                    if ($item->jenis_barang !== 'konsumsi') {
+                        throw new \Exception("{$item->nama_barang} bukan barang konsumsi.");
+                    }
+
+                    $this->service->kurangiStok($item, $row['jumlah_ambil']);
+
+                    ItemUsage::create([
+                        'session_id'     => $sessionId,
+                        'id_barang'      => $item->id,
+                        'id_user'        => null,
+                        'nama_pengambil' => $validated['nama_pengambil'],
+                        'sebagai'        => $validated['sebagai'],
+                        'jumlah_ambil'   => $row['jumlah_ambil'],
+                        'tanggal_ambil'  => now(),
+                    ]);
+                }
+            });
 
             return redirect()->route('ambil.sukses');
 

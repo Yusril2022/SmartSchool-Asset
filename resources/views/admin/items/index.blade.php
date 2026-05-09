@@ -112,7 +112,7 @@
                                 {{ $barang->cabinet->nama_lemari ?? '-' }}
                             </span>
                             <span class="text-xs text-gray-400">
-                                {{ $barang->cabinet->room->nama_ruangan ?? '-' }}
+                                {{ $barang->cabinet->room->nama_ruangan ?? $barang->room->nama_ruangan ?? '-' }}
                             </span>
                         </div>
                     </td>

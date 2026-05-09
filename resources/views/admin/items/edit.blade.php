@@ -52,19 +52,32 @@
 
                 <!-- LEMARI -->
                 <div>
-                    <label class="block text-sm text-gray-600 mb-1">
-                        Lemari
-                    </label>
-                    <select name="id_lemari"
+                    <label class="block text-sm text-gray-600 mb-1">Lemari</label>
+                    <select name="id_lemari" id="selectLemari"
                         class="w-full px-4 py-2 rounded-lg border border-gray-200 text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-orange-400">
+                        <option value="">-- Tidak ada lemari --</option>
+                        @foreach($lemaris as $lemari)
+                        <option value="{{ $lemari->id }}" data-ruangan="{{ $lemari->id_ruangan }}"
+                            {{ old('id_lemari', $barang->id_lemari) == $lemari->id ? 'selected' : '' }}
+                            {{ $lemari->nama_lemari }} - {{ $lemari->room->nama_ruangan }} </option>
+                            @endforeach
+                    </select>
+                </div>
 
-                        @foreach($lemaris as $l)
-                        <option value="{{ $l->id }}"
-                            {{ old('id_lemari', $barang->id_lemari) == $l->id ? 'selected' : '' }}>
-                            {{ $l->nama_lemari }} - {{ $l->room->nama_ruangan }}
+                <!-- RUANGAN — muncul jika tidak pilih lemari -->
+                <div id="divRuangan" class="{{ old('id_lemari', $barang->id_lemari) ? 'hidden' : '' }}">
+                    <label class="block text-sm text-gray-600 mb-1">
+                        Ruangan <span class="text-red-500">*</span>
+                    </label>
+                    <select name="id_ruangan" id="selectRuangan"
+                        class="w-full px-4 py-2 rounded-lg border border-gray-200 text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-orange-400">
+                        <option value="">-- Pilih Ruangan --</option>
+                        @foreach($rooms as $room)
+                        <option value="{{ $room->id }}"
+                            {{ old('id_ruangan', $barang->id_ruangan) == $room->id ? 'selected' : '' }}>
+                            {{ $room->nama_ruangan }}
                         </option>
                         @endforeach
-
                     </select>
                 </div>
 
@@ -141,6 +154,23 @@
             </div>
 
         </form>
+
+        <script>
+        const selectLemari = document.getElementById('selectLemari');
+        const divRuangan = document.getElementById('divRuangan');
+        const selectRuangan = document.getElementById('selectRuangan');
+
+        selectLemari.addEventListener('change', function() {
+            if (this.value === '') {
+                divRuangan.classList.remove('hidden');
+                selectRuangan.required = true;
+            } else {
+                divRuangan.classList.add('hidden');
+                selectRuangan.required = false;
+                selectRuangan.value = '';
+            }
+        });
+        </script>
 
     </div>
 

@@ -48,7 +48,7 @@
                 <!-- LOKASI -->
                 <p class="text-xs text-gray-400">
                     {{ $barang->cabinet->nama_lemari ?? '-' }} •
-                    {{ $barang->cabinet->room->nama_ruangan ?? '-' }}
+                    {{ $barang->cabinet->room->nama_ruangan ?? $barang->room->nama_ruangan ?? '-' }}
                 </p>
 
                 <!-- STOK -->

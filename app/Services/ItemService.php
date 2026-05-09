@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Item;
+use App\Models\Cabinet;
 use Illuminate\Support\Facades\Storage;
 
 class ItemService
@@ -11,40 +12,59 @@ class ItemService
     {
         $fotoPath = null;
         if ($foto) {
-        
             $fotoPath = $foto->store('items', 'public');
         }
 
-    return Item::create([
-        'kode_barang'     => $data['kode_barang'] ?? 'ITM-' . strtoupper(uniqid()),
-        'nama_barang'     => $data['nama_barang'],
-        'kategori'        => $data['kategori'],
-        'stok_awal'       => $data['stok_awal'],
-        'stok_total'      => $data['stok_awal'], 
-        'id_lemari'       => $data['id_lemari'],
-        'jenis_barang'    => $data['jenis_barang'],
-        'merk'            => $data['merk'] ?? null,
-        'hasil_perolehan' => $data['hasil_perolehan'] ?? null,
-        'batas_minimum'   => $data['batas_minimum'] ?? 0,
-        'harga'           => $data['harga'] ?? 0,
-        'foto'            => $fotoPath,
-    ]);
+        // Tentukan id_lemari:
+        // Kalau user pilih lemari        → pakai itu
+        // Kalau skip lemari + pilih ruangan → auto-create cabinet "Tanpa Lemari"
+        // Kalau keduanya skip            → null
+        $idLemari = null;
+
+        if (!empty($data['id_lemari'])) {
+            $idLemari = $data['id_lemari'];
+        } elseif (!empty($data['id_ruangan'])) {
+            $cabinet = Cabinet::firstOrCreate(
+                [
+                    'id_ruangan'  => $data['id_ruangan'],
+                    'nama_lemari' => 'Tanpa Lemari',
+                ],
+                [
+                    // kode_lemari unik per ruangan: TL-{id_ruangan}
+                    'kode_lemari' => 'TL-' . $data['id_ruangan'],
+                ]
+            );
+            $idLemari = $cabinet->id;
+        }
+
+        return Item::create([
+            'kode_barang'     => $data['kode_barang'] ?? 'BRG-' . strtoupper(uniqid()),
+            'nama_barang'     => $data['nama_barang'],
+            'kategori'        => $data['kategori'],
+            'stok_awal'       => $data['stok_awal'],
+            'stok_total'      => $data['stok_awal'],
+            'id_lemari'       => $idLemari,
+            'id_ruangan'      => $data['id_ruangan'] ?? null,
+            'jenis_barang'    => $data['jenis_barang'],
+            'merk'            => $data['merk'] ?? null,
+            'hasil_perolehan' => $data['hasil_perolehan'] ?? null,
+            'batas_minimum'   => $data['batas_minimum'] ?? 0,
+            'harga'           => $data['harga'] ?? 0,
+            'kondisi'         => $data['kondisi'] ?? 'Baik',
+            'foto'            => $fotoPath,
+        ]);
     }
 
-
-    public function update($barang, $data, $foto = null)  // ← tambah parameter foto
+    public function update($barang, $data, $foto = null)
     {
         if ($foto) {
-            // hapus foto lama kalau ada
             if ($barang->foto) {
                 Storage::disk('public')->delete($barang->foto);
             }
-            // simpan foto baru
             $data['foto'] = $foto->store('items', 'public');
         }
 
-        // pastikan stok_total tidak bisa diubah dari sini
-        unset($data['stok_total']);
+        unset($data['stok_total'], $data['stok_awal'], $data['id_ruangan']);
 
         $barang->update($data);
         return $barang;
@@ -52,7 +72,6 @@ class ItemService
 
     public function delete($barang)
     {
-        // hapus foto dari storage sebelum hapus data
         if ($barang->foto) {
             Storage::disk('public')->delete($barang->foto);
         }
@@ -60,7 +79,6 @@ class ItemService
         return $barang->delete();
     }
 
-    // 🔥 tambahan logic penting
     public function tambahStok($barang, $jumlah)
     {
         $barang->increment('stok_total', $jumlah);

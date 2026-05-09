@@ -58,7 +58,8 @@
                 <span class="text-right">
                     {{ $barang->cabinet->nama_lemari ?? '-' }}
                     @if ($barang->cabinet?->room)
-                    <br><span class="text-xs text-gray-400">{{ $barang->cabinet->room->nama_ruangan }}</span>
+                    <br><span
+                        class="text-xs text-gray-400">{{ $barang->cabinet->room->nama_ruangan ?? $barang->room->nama_ruangan ?? '-' }}</span>
                     @endif
                 </span>
             </div>
