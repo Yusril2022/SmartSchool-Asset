@@ -156,32 +156,27 @@
 
     </div>
 
-    {{-- BERITA ACARA --}}
-    @php
-    $beritaAcara = $borrowing->documents
-    ->where('jenis_dokumen', 'Berita Acara Peminjaman')
-    ->first();
-    @endphp
-
-    @if ($beritaAcara)
+    {{-- BERITA ACARA — hanya muncul kalau barang > 10 juta dan status dipinjam/dikembalikan --}}
+    @if ($borrowing->item->harga > 10_000_000 && in_array($borrowing->status, ['dipinjam', 'dikembalikan']))
     <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
 
         <div class="px-5 py-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
             <p class="text-xs uppercase tracking-wider text-gray-400 font-medium">Berita Acara Peminjaman</p>
-            <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
-                Auto-generated
+            <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                Generate on-demand
             </span>
         </div>
 
         <div class="px-5 py-4 flex items-center justify-between">
             <div>
-                <p class="text-sm font-medium text-gray-800">{{ $beritaAcara->judul_dokumen }}</p>
+                <p class="text-sm font-medium text-gray-800">
+                    Berita Acara Peminjaman {{ $borrowing->item->nama_barang }}
+                </p>
                 <p class="text-xs text-gray-400 mt-0.5">
-                    No. {{ $beritaAcara->no_dokumen ?? '-' }} ·
-                    {{ $beritaAcara->tanggal_dokumen->format('d M Y') }}
+                    No. BA-{{ $borrowing->kode_peminjaman }}
                 </p>
             </div>
-            <a href="{{ route('documents.download', $beritaAcara->id) }}"
+            <a href="{{ route('admin.borrowings.berita-acara', $borrowing->id) }}"
                 class="inline-flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold px-4 py-2 rounded-xl transition">
                 ⬇ Download PDF
             </a>
@@ -189,17 +184,12 @@
 
         <div class="px-5 pb-4">
             <p class="text-xs text-gray-400">
-                💡 Cetak dokumen ini, tanda tangani oleh peminjam dan
-                {{ $beritaAcara->uploadedBy->jabatan ?? 'Kepala Sekolah' }},
-                lalu scan dan upload ke menu <a href="{{ route('documents.index') }}"
-                    class="text-orange-500 hover:underline">Arsip Dokumen</a>.
+                💡 Cetak → tanda tangani oleh peminjam dan penandatangan →
+                scan → upload ke
+                <a href="{{ route('documents.index') }}" class="text-orange-500 hover:underline">Arsip Dokumen</a>.
             </p>
         </div>
 
-    </div>
-    @elseif ($borrowing->status === 'dipinjam' && $borrowing->item->harga > 10_000_000)
-    <div class="bg-yellow-50 border border-yellow-200 rounded-2xl px-5 py-4 text-sm text-yellow-700">
-        ⚠️ Berita acara belum ter-generate. Coba approve ulang atau hubungi developer.
     </div>
     @endif
 

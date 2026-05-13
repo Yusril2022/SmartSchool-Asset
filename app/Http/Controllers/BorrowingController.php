@@ -6,10 +6,29 @@ use App\Models\Item;
 use App\Models\Borrowing;
 use Illuminate\Http\Request;
 use App\Services\BorrowingService;
+use App\Services\DocumentService;
 
 class BorrowingController extends Controller
 {
-    public function __construct(protected BorrowingService $service) {}
+    public function __construct(
+        protected BorrowingService $service,
+        protected DocumentService $documentService,
+    ) {}
+
+    // =========================================================
+    // DOWNLOAD BERITA ACARA — generate on-the-fly, tanpa simpan file
+    // =========================================================
+    public function downloadBeritaAcara($id)
+    {
+        $borrowing = Borrowing::with(['item.cabinet.room', 'user', 'admin'])
+            ->findOrFail($id);
+
+        if ($borrowing->item->harga <= 10_000_000) {
+            return back()->with('error', 'Berita acara hanya untuk barang di atas 10 juta.');
+        }
+
+        return $this->documentService->streamBeritaAcara($borrowing);
+    }
 
     // =========================================================
     // LIST — beda tampilan untuk admin vs user
@@ -96,12 +115,11 @@ class BorrowingController extends Controller
 
         $request->validate([
             'action' => 'required|in:approve,tolak,kembali',
-            'tanggal_kembali' => 'nullable|date|after:today',
         ]);
 
         try {
             match ($request->action) {
-                'approve' => $this->service->approve($borrowing, auth()->id(), $request->tanggal_kembali),
+                'approve' => $this->service->approve($borrowing, auth()->id()),
                 'tolak'   => $this->service->tolak($borrowing, auth()->id()),
                 'kembali' => $this->service->kembalikan($borrowing),
             };

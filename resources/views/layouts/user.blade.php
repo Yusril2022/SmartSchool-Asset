@@ -80,15 +80,23 @@
                     <span x-show="!collapse">Peminjaman</span>
                 </a>
 
-                <!-- Scan -->
-                <a href="{{ route('scan.barang') }}" class="flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition
+                <!-- Pengambilan
+                <a href="{{ route('item-usages.index') }}" class="flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition
+                {{ request()->routeIs('item-usages.*') 
+                ? 'bg-orange-500 text-white shadow' 
+                : 'text-gray-600 hover:bg-gray-100' }}">
+                    <span>📋</span>
+                    <span x-show="!collapse">Riwayat Ambil</span>
+                </a> -->
+
+                <!-- Scan <a href="{{ route('scan.barang') }}" class="flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition
                {{ request()->routeIs('scan.*') 
                ? 'bg-orange-500 text-white shadow' 
                : 'text-gray-600 hover:bg-gray-100' }}">
 
                     <span>📷</span>
                     <span x-show="!collapse">Scan Barang</span>
-                </a>
+                    </a> -->
 
             </nav>
 

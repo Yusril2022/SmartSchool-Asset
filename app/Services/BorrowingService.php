@@ -4,11 +4,10 @@ namespace App\Services;
 
 use App\Models\Item;
 use App\Models\Borrowing;
-use App\Services\DocumentService;
 
 class BorrowingService
 {
-    public function __construct(protected DocumentService $documentService) {}
+    public function __construct() {}
 
     // =========================================================
     // USER: Ajukan peminjaman
@@ -46,35 +45,26 @@ class BorrowingService
     // =========================================================
     // ADMIN: Setujui peminjaman
     // =========================================================
-    public function approve(Borrowing $borrowing, int $adminId, ?string $tanggalKembali = null): void
+    public function approve(Borrowing $borrowing, int $adminId): void
     {
+        // Guard: hanya boleh approve jika masih pending
         if ($borrowing->status !== 'pending') {
             throw new \Exception('Peminjaman ini sudah diproses sebelumnya.');
         }
 
         $item = $borrowing->item;
 
+        // Re-check stok saat approve (bisa berubah sejak pengajuan)
         if ($item->stok_total < $borrowing->jumlah_pinjam) {
             throw new \Exception('Stok tidak mencukupi saat approve.');
-        }
-
-        // Barang > 10 juta: tanggal kembali wajib diisi admin saat approve
-        if ($item->harga > 10_000_000 && empty($tanggalKembali)) {
-            throw new \Exception('Tanggal kembali wajib ditentukan oleh admin untuk barang di atas 10 juta.');
         }
 
         $item->decrement('stok_total', $borrowing->jumlah_pinjam);
 
         $borrowing->update([
-            'status'          => 'dipinjam',
-            'id_admin'        => $adminId,
-            'tanggal_kembali' => $item->harga > 10_000_000 ? $tanggalKembali : $borrowing->tanggal_kembali,
+            'status'   => 'dipinjam',
+            'id_admin' => $adminId,
         ]);
-
-        // Auto-generate dokumen jika harga barang > 10 juta
-        if ($item->harga > 10_000_000) {
-            $this->documentService->generateBeritaAcara($borrowing->fresh(['item', 'user', 'admin']));
-        }
     }
 
     // =========================================================

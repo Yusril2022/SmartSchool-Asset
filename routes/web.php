@@ -71,6 +71,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
             'show'   => 'admin.borrowings.show',
             'update' => 'admin.borrowings.update',
         ]);
+    
+    Route::get('admin/borrowings/{id}/berita-acara', [BorrowingController::class, 'downloadBeritaAcara'])
+    ->name('admin.borrowings.berita-acara');
 
     Route::get('admin/item-usages', [ItemUsageController::class, 'adminIndex'])
         ->name('admin.item-usages.index');
@@ -83,8 +86,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::get('items/{id}/qr', [ItemController::class, 'downloadQr'])
         ->name('items.qr');
+        
     Route::get('asset-position', [AssetPositionController::class, 'index'])
     ->name('asset-position.index');
+    
     Route::get('asset-position/print', [AssetPositionController::class, 'print'])
         ->name('asset-position.print');
 });
