@@ -78,6 +78,7 @@ class BorrowingController extends Controller
             'id_barang'     => 'required|exists:items,id',
             'jumlah_pinjam' => 'required|integer|min:1',
             'tujuan_pinjam' => 'required|string|max:255',
+            'jam_kembali' => 'nullable|date_format:H:i',
         ];
 
         if ($item->harga <= 10_000_000) {
@@ -96,6 +97,7 @@ class BorrowingController extends Controller
                 $validated['jumlah_pinjam'],
                 $validated['tanggal_kembali'] ?? null,
                 $validated['tujuan_pinjam'],
+                $validated['jam_kembali'] ?? null,
             );
 
             return redirect()->route('borrowings.index')

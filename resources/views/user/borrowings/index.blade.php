@@ -38,6 +38,7 @@
                     <th class="px-6 py-4 text-left">Barang</th>
                     <th class="px-6 py-4 text-left">Jumlah</th>
                     <th class="px-6 py-4 text-left">Tgl Pinjam</th>
+                    <th class="px-6 py-4 text-left">Jam Kembali</th>
                     <th class="px-6 py-4 text-left">Tgl Kembali</th>
                     <th class="px-6 py-4 text-left">Status</th>
                     <th class="px-6 py-4 text-center">Detail</th>
@@ -70,6 +71,12 @@
                         @else
                         <span class="text-gray-400 italic">Ditentukan admin</span>
                         @endif
+                    </td>
+
+                    <td class="px-6 py-4 text-gray-600">
+                        {{ $p->jam_kembali 
+                        ? \Carbon\Carbon::parse($p->jam_kembali)->format('H:i') . ' WIB'
+                        : 'Per hari' }}
                     </td>
 
                     <td class="px-6 py-4">

@@ -104,9 +104,29 @@
             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
             @enderror
 </div>
+{{-- JAM KEMBALI — opsional --}}
+<div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">
+        Jam Kembali
+        <span class="text-gray-400 text-xs font-normal">
+            (opsional — isi jika pinjam hitungan jam)
+        </span>
+    </label>
+    <input type="time" name="jam_kembali" value="{{ old('jam_kembali') }}"
+        class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+    @error('jam_kembali')
+    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+    @enderror
+    <p class="text-xs text-gray-400 mt-1">
+        Contoh: 14:00 — kosongkan jika pinjam per hari penuh
+    </p>
+</div>
+
+</div>
+
 @else
 <div class="bg-blue-50 border border-blue-100 text-blue-700 px-4 py-3 rounded-xl text-sm">
-    ℹ️ Barang bernilai di atas Rp 10 juta. Tanggal kembali akan ditentukan bersama admin.
+    ℹ️ Barang bernilai di atas Rp 10 juta. Tanggal kembali ditentukan bersama admin.
 </div>
 @endif
 

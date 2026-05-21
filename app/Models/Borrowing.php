@@ -17,6 +17,7 @@ class Borrowing extends Model
         'tujuan_pinjam',
         'status',
         'tanggal_peminjaman',
+        'jam_kembali',
         'tanggal_kembali',
     ];
 

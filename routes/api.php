@@ -16,4 +16,5 @@ Route::middleware('api.token')->group(function () {
 
     // Rekap harian
     Route::get('/rekap/hari-ini',       [ApiController::class, 'rekapHariIni']);
+    Route::post('/borrowings/tandai-notifikasi', [ApiController::class, 'tandaiNotifikasi']);
 });

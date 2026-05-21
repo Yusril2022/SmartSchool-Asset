@@ -94,6 +94,7 @@
                     <th class="px-6 py-4 text-left">Barang</th>
                     <th class="px-6 py-4 text-left">Jumlah</th>
                     <th class="px-6 py-4 text-left">Tgl Pinjam</th>
+                    <th class="px-6 py-4 text-left">Jam Kembali</th>
                     <th class="px-6 py-4 text-left">Status</th>
                     <th class="px-6 py-4 text-center">Aksi</th>
                 </tr>
@@ -123,6 +124,12 @@
 
                     <td class="px-6 py-4 text-xs text-gray-500">
                         {{ \Carbon\Carbon::parse($p->tanggal_peminjaman)->format('d M Y') }}
+                    </td>
+
+                    <td class="px-6 py-4 text-gray-600">
+                        {{ $p->jam_kembali 
+                        ? \Carbon\Carbon::parse($p->jam_kembali)->format('H:i') . ' WIB'
+                        : 'Per hari' }}
                     </td>
 
                     <td class="px-6 py-4">

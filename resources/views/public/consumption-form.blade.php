@@ -130,9 +130,22 @@
     const btnTambah = document.getElementById('btnTambah');
     let rowIndex = 1;
 
-    function buildOptions(selectedId) {
+    function getSelectedIds(excludeSelect) {
+        var ids = [];
+        document.querySelectorAll('.barang-select').forEach(function(sel) {
+            if (sel !== excludeSelect && sel.value) {
+                ids.push(sel.value);
+            }
+        });
+        return ids;
+    }
+
+    function buildOptions(selectedId, excludeSelect) {
+        var usedIds = getSelectedIds(excludeSelect);
         let opts = '<option value="">-- Pilih Barang --</option>';
         Object.values(itemsData).forEach(function(item) {
+            // Sembunyikan barang yang sudah dipilih di baris lain
+            if (usedIds.indexOf(String(item.id)) !== -1) return;
             var sel = item.id == selectedId ? 'selected' : '';
             opts += '<option value="' + item.id + '" data-stok="' + item.stok_total + '" ' + sel + '>' +
                 item.nama_barang + ' (Stok: ' + item.stok_total + ')' +
@@ -141,14 +154,36 @@
         return opts;
     }
 
+    function refreshAllDropdowns() {
+        document.querySelectorAll('.barang-select').forEach(function(sel) {
+            var currentVal = sel.value;
+            sel.innerHTML = buildOptions(currentVal, sel);
+        });
+    }
+
+    // Refresh semua dropdown saat salah satu berubah
+    barangList.addEventListener('change', function(e) {
+        if (e.target.classList.contains('barang-select')) {
+            refreshAllDropdowns();
+        }
+    });
+
     btnTambah.addEventListener('click', function() {
+        // Cek apakah semua barang sudah dipilih — kalau iya tidak perlu tambah baris
+        var usedIds = getSelectedIds(null);
+        var totalBarang = Object.keys(itemsData).length;
+        if (usedIds.length >= totalBarang) {
+            alert('Semua barang tersedia sudah dipilih.');
+            return;
+        }
+
         var row = document.createElement('div');
         row.className = 'barang-row flex gap-2 items-start';
         row.innerHTML =
             '<div class="flex-1">' +
             '<select name="items[' + rowIndex + '][id_barang]" required' +
             ' class="barang-select w-full px-3 py-2.5 rounded-xl border border-gray-200 text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm">' +
-            buildOptions('') +
+            buildOptions('', null) +
             '</select>' +
             '</div>' +
             '<div class="w-24">' +
@@ -161,11 +196,13 @@
             ' class="w-9 h-10 flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-400 rounded-xl transition text-sm">✕</button>' +
             '</div>';
         barangList.appendChild(row);
+        refreshAllDropdowns();
         rowIndex++;
     });
 
     function hapusBaris(btn) {
         btn.closest('.barang-row').remove();
+        refreshAllDropdowns();
     }
 
     document.getElementById('formAmbil').addEventListener('submit', function(e) {

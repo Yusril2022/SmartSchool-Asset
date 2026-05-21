@@ -12,7 +12,7 @@ class BorrowingService
     // =========================================================
     // USER: Ajukan peminjaman
     // =========================================================
-    public function pinjam(int $userId, int $itemId, int $jumlah, ?string $tanggalKembali, ?string $tujuanPinjam = null): Borrowing
+    public function pinjam(int $userId, int $itemId, int $jumlah, ?string $tanggalKembali, ?string $tujuanPinjam = null, ?string $jamKembali = null): Borrowing
     {
         $item = Item::findOrFail($itemId);
 
@@ -38,6 +38,7 @@ class BorrowingService
             'tujuan_pinjam'     => $tujuanPinjam,
             'status'            => 'pending',
             'tanggal_peminjaman' => now(),
+            'jam_kembali'       => $jamKembali,
             'tanggal_kembali'   => $item->harga > 10_000_000 ? null : $tanggalKembali,
         ]);
     }

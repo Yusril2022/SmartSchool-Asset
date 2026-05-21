@@ -81,7 +81,7 @@
                     <th class="px-6 py-4 text-left">No. Dokumen</th>
                     <th class="px-6 py-4 text-left">Tanggal</th>
                     <th class="px-6 py-4 text-left">Pihak Terkait</th>
-                    <th class="px-6 py-4 text-left">Barang</th>
+                    <!-- <th class="px-6 py-4 text-left">Barang</th> -->
                     <th class="px-6 py-4 text-left">Diupload Oleh</th>
                     <th class="px-6 py-4 text-center">Aksi</th>
                 </tr>
@@ -118,9 +118,9 @@
                         {{ $doc->pihak_terkait ?? '-' }}
                     </td>
 
-                    <td class="px-6 py-4 text-gray-600">
+                    <!-- <td class="px-6 py-4 text-gray-600">
                         {{ $doc->item->nama_barang ?? '-' }}
-                    </td>
+                    </td> -->
 
                     <td class="px-6 py-4 text-gray-600">
                         {{ $doc->uploadedBy->name ?? '-' }}
