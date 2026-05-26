@@ -34,22 +34,36 @@ class BorrowingController extends Controller
     // LIST — beda tampilan untuk admin vs user
     // =========================================================
     public function index()
-{
+    {
     if (auth()->user()->role === 'admin') {
-        $data = Borrowing::with(['item', 'user'])
-            ->latest()
-            ->paginate(15);
+        $query = Borrowing::with(['item', 'user'])->latest();
 
+        if (request('status') && request('status') !== 'semua') {
+            if (request('status') === 'terlambat') {
+                // Terlambat = dipinjam + tanggal_kembali sudah lewat
+                $query->where('status', 'dipinjam')
+                    ->whereNotNull('tanggal_kembali')
+                    ->where('tanggal_kembali', '<', now());
+            } else {
+                $query->where('status', request('status'));
+            }
+        }
+
+        // Filter search dan tanggal yang sudah ada
+        if (request('search')) {
+            $query->whereHas('user', fn($q) => $q->where('name', 'like', '%' . request('search') . '%'));
+        }
+        if (request('dari')) {
+            $query->whereDate('tanggal_peminjaman', '>=', request('dari'));
+        }
+        if (request('sampai')) {
+            $query->whereDate('tanggal_peminjaman', '<=', request('sampai'));
+        }
+
+        $data = $query->paginate(15);
         return view('admin.borrowings.index', compact('data'));
+        }
     }
-
-    $data = Borrowing::with('item')
-        ->where('id_user', auth()->id())
-        ->latest()
-        ->paginate(10);
-
-    return view('user.borrowings.index', compact('data'));
-}
 
     // =========================================================
     // FORM — hanya tampil untuk barang aset

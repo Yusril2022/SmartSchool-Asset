@@ -143,7 +143,7 @@
                             <span class="text-xs text-gray-400 px-3 py-1.5">No file</span>
                             @endif
 
-                            <form action="{{ route('documents.destroy', $doc->id) }}" method="POST">
+                            <form action="{{ route('documents.destroy', $doc->id) }}" method="POST" data-no-loading>
                                 @csrf @method('DELETE')
                                 <button onclick="return confirm('Yakin hapus dokumen ini?')"
                                     class="px-3 py-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition text-xs font-medium">

@@ -75,6 +75,7 @@
                     <th class="px-6 py-4 text-left">Kategori</th>
                     <th class="px-6 py-4 text-left">Lokasi</th>
                     <th class="px-6 py-4 text-left">Stok</th>
+                    <th class="px-6 py-4 text-left">Kondisi</th>
                     <th class="px-6 py-4 text-center">QR</th>
                     <th class="px-6 py-4 text-center">Aksi</th>
                 </tr>
@@ -127,6 +128,23 @@
                         </span>
                     </td>
 
+                    <!-- KONDISI -->
+                    <td class="px-6 py-4">
+                        @php
+                        $kondisiBadge = match($barang->kondisi) {
+                        'Baik' => 'bg-green-100 text-green-700',
+                        'Rusak Ringan' => 'bg-yellow-100 text-yellow-700',
+                        'Rusak Sedang' => 'bg-orange-100 text-orange-700',
+                        'Rusak Berat' => 'bg-red-100 text-red-700',
+                        'Mati Total' => 'bg-gray-200 text-gray-600',
+                        default => 'bg-gray-100 text-gray-500',
+                        };
+                        @endphp
+                        <span class="px-2 py-1 rounded-full text-xs font-medium {{ $kondisiBadge }}">
+                            {{ $barang->kondisi ?? 'Baik' }}
+                        </span>
+                    </td>
+
                     <!-- QR -->
                     <td class="px-6 py-4 text-center">
                         <div class="flex justify-center">
@@ -153,7 +171,7 @@
                             </a>
 
                             <!-- DELETE -->
-                            <form action="{{ route('items.destroy', $barang->id) }}" method="POST">
+                            <form action="{{ route('items.destroy', $barang->id) }}" method="POST" data-no-loading>
                                 @csrf
                                 @method('DELETE')
 

@@ -117,6 +117,31 @@
                     @enderror
                 </div>
 
+                <!-- KONDISI -->
+                <div>
+                    <label class="block text-sm text-gray-600 mb-1">Kondisi Barang</label>
+                    <select name="kondisi"
+                        class="w-full px-4 py-2 rounded-lg border border-gray-200 text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-orange-400">
+                        <option value="Baik" {{ old('kondisi', $barang->kondisi) == 'Baik'         ? 'selected' : '' }}>
+                            Baik</option>
+                        <option value="Rusak Ringan"
+                            {{ old('kondisi', $barang->kondisi) == 'Rusak Ringan' ? 'selected' : '' }}>Rusak Ringan
+                        </option>
+                        <option value="Rusak Sedang"
+                            {{ old('kondisi', $barang->kondisi) == 'Rusak Sedang' ? 'selected' : '' }}>Rusak Sedang
+                        </option>
+                        <option value="Rusak Berat"
+                            {{ old('kondisi', $barang->kondisi) == 'Rusak Berat'  ? 'selected' : '' }}>Rusak Berat
+                        </option>
+                        <option value="Mati Total"
+                            {{ old('kondisi', $barang->kondisi) == 'Mati Total'   ? 'selected' : '' }}>Mati Total
+                        </option>
+                    </select>
+                    @error('kondisi')
+                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <!-- FOTO -->
                 <div class="md:col-span-2">
                     <label class="block text-sm text-gray-600 mb-1">Foto Barang</label>

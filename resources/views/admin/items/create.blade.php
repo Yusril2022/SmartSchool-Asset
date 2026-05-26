@@ -154,6 +154,24 @@
                         class="w-full px-4 py-2 rounded-lg border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-400">
                 </div>
 
+                <!-- KONDISI -->
+                <div>
+                    <label class="block text-sm text-gray-600 mb-1">Kondisi Barang</label>
+                    <select name="kondisi"
+                        class="w-full px-4 py-2 rounded-lg border border-gray-200 text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-orange-400">
+                        <option value="Baik" {{ old('kondisi', 'Baik') == 'Baik'          ? 'selected' : '' }}>Baik
+                        </option>
+                        <option value="Rusak Ringan" {{ old('kondisi') == 'Rusak Ringan'  ? 'selected' : '' }}>Rusak
+                            Ringan</option>
+                        <option value="Rusak Sedang" {{ old('kondisi') == 'Rusak Sedang'  ? 'selected' : '' }}>Rusak
+                            Sedang</option>
+                        <option value="Rusak Berat" {{ old('kondisi') == 'Rusak Berat'   ? 'selected' : '' }}>Rusak
+                            Berat</option>
+                        <option value="Mati Total" {{ old('kondisi') == 'Mati Total'    ? 'selected' : '' }}>Mati Total
+                        </option>
+                    </select>
+                </div>
+
                 <div class="md:col-span-2">
                     <label class="block text-sm text-gray-600 mb-1">Foto Barang</label>
                     <input type="file" name="foto" accept="image/*"

@@ -99,7 +99,7 @@
                             </a>
 
                             @if($user->id !== auth()->id())
-                            <form action="{{ route('users.destroy', $user->id) }}" method="POST">
+                            <form action="{{ route('users.destroy', $user->id) }}" method="POST" data-no-loading>
                                 @csrf @method('DELETE')
                                 <button onclick="return confirm('Yakin hapus user {{ $user->name }}?')"
                                     class="px-3 py-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition text-xs font-medium">

@@ -25,8 +25,12 @@
     {{-- FILTER STATUS --}}
     <div class="flex flex-wrap gap-2">
         @php
-        $statuses = ['semua' => 'Semua', 'pending' => '⏳ Pending', 'dipinjam' => '📦 Dipinjam', 'dikembalikan' => '✅
-        Dikembalikan', 'ditolak' => '❌ Ditolak'];
+        $statuses = ['semua' => 'Semua',
+        'pending' => '⏳ Pending',
+        'dipinjam' => '📦 Dipinjam',
+        'terlambat' => '🚨Terlambat',
+        'dikembalikan' => '✅ Dikembalikan',
+        'ditolak' => '❌ Ditolak'];
         $aktif = request('status', 'semua');
         @endphp
         @foreach ($statuses as $val => $label)
@@ -134,16 +138,26 @@
 
                     <td class="px-6 py-4">
                         @php
-                        $badge = match($p->status) {
+                        $statusDisplay = $p->status_display;
+                        $badge = match($statusDisplay) {
                         'pending' => 'bg-yellow-100 text-yellow-600',
                         'dipinjam' => 'bg-orange-100 text-orange-600',
+                        'terlambat' => 'bg-red-100 text-red-600',
                         'dikembalikan' => 'bg-green-100 text-green-600',
                         'ditolak' => 'bg-red-100 text-red-500',
                         default => 'bg-gray-100 text-gray-500',
                         };
+                        $label = match($statusDisplay) {
+                        'pending' => '⏳ Pending',
+                        'dipinjam' => '📦 Dipinjam',
+                        'terlambat' => '🚨 Terlambat',
+                        'dikembalikan' => '✅ Dikembalikan',
+                        'ditolak' => '❌ Ditolak',
+                        default => ucfirst($statusDisplay),
+                        };
                         @endphp
                         <span class="px-3 py-1 rounded-full text-xs font-medium {{ $badge }}">
-                            {{ ucfirst($p->status) }}
+                            {{ $label }}
                         </span>
                     </td>
 

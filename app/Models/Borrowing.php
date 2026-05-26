@@ -21,6 +21,24 @@ class Borrowing extends Model
         'tanggal_kembali',
     ];
 
+    protected $casts = [
+    'tanggal_peminjaman' => 'datetime',
+    'tanggal_kembali'    => 'datetime',
+    ];
+
+    public function getStatusDisplayAttribute(): string
+    {
+        if (
+            $this->status === 'dipinjam' &&
+            $this->tanggal_kembali &&
+            $this->tanggal_kembali->isPast()
+        ) {
+            return 'terlambat';
+        }
+
+        return $this->status;
+    }
+
     // 🔥 RELASI
     public function user()
     {

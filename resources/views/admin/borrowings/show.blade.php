@@ -31,6 +31,7 @@
     $bannerConfig = match($borrowing->status) {
     'pending' => ['bg-yellow-50 border-yellow-200 text-yellow-700', '⏳ Menunggu persetujuan admin'],
     'dipinjam' => ['bg-orange-50 border-orange-200 text-orange-700', '📦 Barang sedang dipinjam'],
+    'terlambat' => ['bg-red-50 border-red-200 text-red-700', '🚨 Melewati batas waktu pengembalian!'],
     'dikembalikan' => ['bg-green-50 border-green-200 text-green-700', '✅ Barang telah dikembalikan'],
     'ditolak' => ['bg-red-50 border-red-200 text-red-600', '❌ Pengajuan ditolak'],
     default => ['bg-gray-50 border-gray-200 text-gray-600', ucfirst($borrowing->status)],

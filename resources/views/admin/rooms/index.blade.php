@@ -73,7 +73,7 @@
                             </a>
 
                             <!-- DELETE -->
-                            <form action="{{ route('rooms.destroy',$ruangan->id) }}" method="POST">
+                            <form action="{{ route('rooms.destroy',$ruangan->id) }}" method="POST" data-no-loading>
                                 @csrf
                                 @method('DELETE')
 

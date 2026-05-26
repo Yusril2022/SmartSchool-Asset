@@ -89,7 +89,7 @@
                             </a>
 
                             <!-- DELETE -->
-                            <form action="{{ route('cabinets.destroy',$lemari->id) }}" method="POST">
+                            <form action="{{ route('cabinets.destroy',$lemari->id) }}" method="POST" data-no-loading>
                                 @csrf
                                 @method('DELETE')
 
