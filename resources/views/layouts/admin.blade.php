@@ -153,7 +153,69 @@
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <button class="text-gray-400 hover:text-orange-500 text-lg">🔔</button>
+
+                    {{-- NOTIFIKASI --}}
+                    <div x-data="{ notifOpen: false }" class="relative">
+
+                        {{-- TOMBOL LONCENG --}}
+                        <button @click="notifOpen = !notifOpen"
+                            class="relative text-gray-400 hover:text-orange-500 transition">
+                            <span class="text-xl">🔔</span>
+                            @if($notifCount > 0)
+                            <span
+                                class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                                {{ $notifCount > 9 ? '9+' : $notifCount }}
+                            </span>
+                            @endif
+                        </button>
+
+                        {{-- DROPDOWN --}}
+                        <div x-show="notifOpen" x-transition @click.outside="notifOpen = false"
+                            class="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-2xl shadow-lg z-50 overflow-hidden">
+
+                            <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                                <span class="font-semibold text-gray-800 text-sm">Notifikasi</span>
+                                @if($notifCount > 0)
+                                <span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium">
+                                    {{ $notifCount }} baru
+                                </span>
+                                @endif
+                            </div>
+
+                            <ul class="max-h-80 overflow-y-auto divide-y divide-gray-50">
+                                @forelse($notifData as $notif)
+                                <li>
+                                    <a href="{{ $notif['url'] }}"
+                                        class="flex items-start gap-3 px-4 py-3 hover:{{ $notif['bg'] }} transition">
+                                        <span class="text-lg shrink-0 mt-0.5">{{ $notif['icon'] }}</span>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-xs text-gray-700 leading-snug">{{ $notif['text'] }}</p>
+                                            @if($notif['time'])
+                                            <p class="text-[11px] text-gray-400 mt-0.5">{{ $notif['time'] }}</p>
+                                            @endif
+                                        </div>
+                                    </a>
+                                </li>
+                                @empty
+                                <li class="px-4 py-6 text-center text-gray-400 text-sm">
+                                    <div class="text-3xl mb-2">✅</div>
+                                    Semua aman, tidak ada notifikasi
+                                </li>
+                                @endforelse
+                            </ul>
+
+                            @if($notifCount > 0)
+                            <div class="px-4 py-2 border-t border-gray-100 text-center">
+                                <a href="{{ route('admin.borrowings.index') }}"
+                                    class="text-xs text-orange-500 hover:underline font-medium">
+                                    Lihat semua peminjaman →
+                                </a>
+                            </div>
+                            @endif
+
+                        </div>
+                    </div>
+
                     <span class="text-sm text-gray-600 hidden md:block">{{ auth()->user()->name }}</span>
                     <img src="https://i.pravatar.cc/40"
                         class="w-8 h-8 md:w-9 md:h-9 rounded-full border border-gray-200">
