@@ -43,6 +43,37 @@ public function index()
 
         $chartValues = $chartData->pluck('total')->toArray();
 
+        // ── TOP 5 BARANG PALING SERING DIPINJAM (aset) ──
+        $topDipinjam = \App\Models\Borrowing::selectRaw('id_barang, COUNT(*) as total_pinjam')
+            ->whereIn('status', ['dipinjam', 'dikembalikan'])
+            ->groupBy('id_barang')
+            ->orderByDesc('total_pinjam')
+            ->take(5)
+            ->with('item')
+            ->get();
+
+        // ── TOP 5 BARANG PALING SERING DIAMBIL (konsumsi) ──
+        $topDiambil = \App\Models\ItemUsage::selectRaw('id_barang, COUNT(*) as total_ambil, SUM(jumlah_ambil) as total_jumlah')
+            ->groupBy('id_barang')
+            ->orderByDesc('total_ambil')
+            ->take(5)
+            ->with('item')
+            ->get();
+
+        // ── PREDIKSI KEBUTUHAN BULAN DEPAN ──
+        // Ambil rata-rata pengambilan per bulan selama 3 bulan terakhir per barang
+        $prediksi = \App\Models\ItemUsage::selectRaw(
+                'id_barang,
+                 SUM(jumlah_ambil) as total_3bulan,
+                 ROUND(SUM(jumlah_ambil) / 3.0) as prediksi_bulan_depan'
+            )
+            ->where('tanggal_ambil', '>=', now()->subMonths(3))
+            ->groupBy('id_barang')
+            ->orderByDesc('prediksi_bulan_depan')
+            ->take(5)
+            ->with('item')
+            ->get();
+
         return view('admin.dashboard', compact(
             'totalBarang',
             'totalAset',
@@ -55,6 +86,9 @@ public function index()
             'peminjamanPending',
             'chartLabels',
             'chartValues',
+            'topDipinjam',
+            'topDiambil',
+            'prediksi',
         ));
     }
 

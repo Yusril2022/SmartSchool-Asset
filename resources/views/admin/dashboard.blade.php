@@ -95,6 +95,135 @@
 
     </div>
 
+    {{-- TOP BARANG DIPINJAM + DIAMBIL --}}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        {{-- TOP DIPINJAM --}}
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+            <h3 class="text-gray-800 font-semibold mb-4">🏆 Top Barang Paling Sering Dipinjam</h3>
+            <ul class="space-y-3">
+                @forelse($topDipinjam as $i => $row)
+                <li class="flex items-center gap-3">
+                    <span
+                        class="w-6 h-6 rounded-full bg-orange-100 text-orange-600 text-xs font-bold flex items-center justify-center shrink-0">
+                        {{ $i + 1 }}
+                    </span>
+                    <div class="flex-1 min-w-0">
+                        <a href="{{ route('items.edit', $row->item->id ?? 0) }}"
+                            class="text-sm font-medium text-gray-800 hover:text-orange-500 truncate block">
+                            {{ $row->item->nama_barang ?? '-' }}
+                        </a>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <div class="flex-1 bg-gray-100 rounded-full h-1.5">
+                                <div class="bg-orange-400 h-1.5 rounded-full"
+                                    style="width: {{ $topDipinjam->max('total_pinjam') > 0 ? ($row->total_pinjam / $topDipinjam->max('total_pinjam') * 100) : 0 }}%">
+                                </div>
+                            </div>
+                            <span class="text-xs text-gray-400 shrink-0">{{ $row->total_pinjam }}x</span>
+                        </div>
+                    </div>
+                </li>
+                @empty
+                <li class="text-gray-400 text-sm">Belum ada data peminjaman</li>
+                @endforelse
+            </ul>
+        </div>
+
+        {{-- TOP DIAMBIL --}}
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+            <h3 class="text-gray-800 font-semibold mb-4">📦 Top Barang Paling Sering Diambil</h3>
+            <ul class="space-y-3">
+                @forelse($topDiambil as $i => $row)
+                <li class="flex items-center gap-3">
+                    <span
+                        class="w-6 h-6 rounded-full bg-green-100 text-green-600 text-xs font-bold flex items-center justify-center shrink-0">
+                        {{ $i + 1 }}
+                    </span>
+                    <div class="flex-1 min-w-0">
+                        <a href="{{ route('items.edit', $row->item->id ?? 0) }}"
+                            class="text-sm font-medium text-gray-800 hover:text-green-500 truncate block">
+                            {{ $row->item->nama_barang ?? '-' }}
+                        </a>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <div class="flex-1 bg-gray-100 rounded-full h-1.5">
+                                <div class="bg-green-400 h-1.5 rounded-full"
+                                    style="width: {{ $topDiambil->max('total_ambil') > 0 ? ($row->total_ambil / $topDiambil->max('total_ambil') * 100) : 0 }} %">
+                                </div>
+                            </div>
+                            <span class="text-xs text-gray-400 shrink-0">{{ $row->total_jumlah }} unit</span>
+                        </div>
+                    </div>
+                </li>
+                @empty
+                <li class="text-gray-400 text-sm">Belum ada data pengambilan</li>
+                @endforelse
+            </ul>
+        </div>
+
+    </div>
+
+    {{-- PREDIKSI KEBUTUHAN --}}
+    <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h3 class="text-gray-800 font-semibold">🔮 Prediksi Kebutuhan Bulan Depan</h3>
+                <p class="text-xs text-gray-400 mt-0.5">Berdasarkan rata-rata pengambilan 3 bulan terakhir</p>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-xs text-gray-400 uppercase border-b border-gray-100">
+                        <th class="text-left pb-3">Barang</th>
+                        <th class="text-center pb-3">Total 3 Bulan</th>
+                        <th class="text-center pb-3">Rata-rata/Bulan</th>
+                        <th class="text-center pb-3">Prediksi Bulan Depan</th>
+                        <th class="text-center pb-3">Stok Sekarang</th>
+                        <th class="text-center pb-3">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    @forelse($prediksi as $row)
+                    @php
+                    $stok = $row->item->stok_total ?? 0;
+                    $pred = $row->prediksi_bulan_depan;
+                    $cukup = $stok >= $pred;
+                    @endphp
+                    <tr class="hover:bg-gray-50">
+                        <td class="py-3">
+                            <a href="{{ route('items.edit', $row->item->id ?? 0) }}"
+                                class="font-medium text-gray-800 hover:text-orange-500">
+                                {{ $row->item->nama_barang ?? '-' }}
+                            </a>
+                        </td>
+                        <td class="py-3 text-center text-gray-600">{{ $row->total_3bulan }} unit</td>
+                        <td class="py-3 text-center text-gray-600">{{ round($row->total_3bulan / 3) }} unit</td>
+                        <td class="py-3 text-center font-semibold text-gray-800">{{ $pred }} unit</td>
+                        <td
+                            class="py-3 text-center {{ $stok <= ($row->item->batas_minimum ?? 0) ? 'text-red-500 font-semibold' : 'text-gray-600' }}">
+                            {{ $stok }}
+                        </td>
+                        <td class="py-3 text-center">
+                            @if ($cukup)
+                            <span class="px-2 py-1 rounded-full text-xs bg-green-100 text-green-700 font-medium">✅
+                                Cukup</span>
+                            @else
+                            <span class="px-2 py-1 rounded-full text-xs bg-red-100 text-red-600 font-medium">⚠️ Perlu
+                                Tambah</span>
+                            @endif
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" class="text-center py-6 text-gray-400">Belum ada data pengambilan 3 bulan
+                            terakhir</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
 
 <!-- CHART SCRIPT -->
