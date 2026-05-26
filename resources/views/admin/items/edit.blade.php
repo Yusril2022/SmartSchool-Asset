@@ -142,6 +142,17 @@
                     @enderror
                 </div>
 
+                <!-- CATATAN KONDISI -->
+                <div class="md:col-span-2">
+                    <label class="block text-sm text-gray-600 mb-1">
+                        Catatan Perubahan Kondisi
+                        <span class="text-gray-400 text-xs font-normal">(opsional)</span>
+                    </label>
+                    <input type="text" name="catatan_kondisi" value="{{ old('catatan_kondisi') }}"
+                        placeholder="Contoh: Layar retak akibat terjatuh"
+                        class="w-full px-4 py-2 rounded-lg border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-400">
+                </div>
+
                 <!-- FOTO -->
                 <div class="md:col-span-2">
                     <label class="block text-sm text-gray-600 mb-1">Foto Barang</label>
@@ -179,6 +190,66 @@
             </div>
 
         </form>
+        @if($barang->conditionLogs->count() > 0)
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+
+            <h3 class="text-sm font-semibold text-gray-700 mb-4">
+                📋 Riwayat Perubahan Kondisi
+            </h3>
+
+            <div class="space-y-3">
+                @foreach($barang->conditionLogs->sortByDesc('created_at') as $log)
+                <div class="flex items-start gap-3 text-sm">
+
+                    <!-- ICON -->
+                    <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center shrink-0 mt-0.5">
+                        <span class="text-orange-500 text-xs">🔄</span>
+                    </div>
+
+                    <!-- DETAIL -->
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <!-- KONDISI LAMA -->
+                            <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                {{ $log->kondisi_lama ?? 'Baru' }}
+                            </span>
+
+                            <span class="text-gray-400">→</span>
+
+                            <!-- KONDISI BARU -->
+                            @php
+                            $badge = match($log->kondisi_baru) {
+                            'Baik' => 'bg-green-100 text-green-700',
+                            'Rusak Ringan' => 'bg-yellow-100 text-yellow-700',
+                            'Rusak Sedang' => 'bg-orange-100 text-orange-700',
+                            'Rusak Berat' => 'bg-red-100 text-red-700',
+                            'Mati Total' => 'bg-gray-200 text-gray-600',
+                            default => 'bg-gray-100 text-gray-500',
+                            };
+                            @endphp
+                            <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $badge }}">
+                                {{ $log->kondisi_baru }}
+                            </span>
+                        </div>
+
+                        <div class="text-xs text-gray-400 mt-1">
+                            {{ $log->admin->name ?? '-' }} •
+                            {{ \Carbon\Carbon::parse($log->created_at)->format('d M Y, H:i') }}
+                        </div>
+
+                        @if($log->catatan)
+                        <p class="text-xs text-gray-500 mt-1 italic">
+                            "{{ $log->catatan }}"
+                        </p>
+                        @endif
+                    </div>
+
+                </div>
+                @endforeach
+            </div>
+
+        </div>
+        @endif
 
         <script>
         const selectLemari = document.getElementById('selectLemari');

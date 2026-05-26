@@ -87,6 +87,12 @@ class Item extends Model
         return $this->hasMany(Document::class, 'id_barang');
     }
 
+    // Riwayat perubahan kondisi barang
+    public function conditionLogs()
+    {
+        return $this->hasMany(ItemConditionLog::class, 'id_barang');
+    }
+
     // =========================================================
     // SCOPES: untuk filter di query
     // =========================================================

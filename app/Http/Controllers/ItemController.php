@@ -147,7 +147,7 @@ class ItemController extends Controller
 
     public function edit($id)
     {
-        $barang  = Item::findOrFail($id);
+        $barang  = Item::with('conditionLogs.admin')->findOrFail($id);
         $lemaris = Cabinet::with('room')->get();
         $rooms   = Room::orderBy('nama_ruangan')->get();
         return view('admin.items.edit', compact('barang', 'lemaris', 'rooms'));

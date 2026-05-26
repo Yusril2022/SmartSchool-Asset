@@ -64,7 +64,21 @@ class ItemService
             $data['foto'] = $foto->store('items', 'public');
         }
 
-        unset($data['stok_total'], $data['stok_awal'], $data['id_ruangan']);
+   // Catat log kondisi jika kondisi berubah
+        if (
+            isset($data['kondisi']) &&
+            $data['kondisi'] !== $barang->kondisi
+        ) {
+            \App\Models\ItemConditionLog::create([
+                'id_barang'    => $barang->id,
+                'id_admin'     => auth()->id(),
+                'kondisi_lama' => $barang->kondisi,
+                'kondisi_baru' => $data['kondisi'],
+                'catatan'      => $data['catatan_kondisi'] ?? null,
+            ]);
+        }
+    
+        unset($data['stok_total'], $data['stok_awal'], $data['id_ruangan'], $data['catatan_kondisi']);
 
         $barang->update($data);
         return $barang;
