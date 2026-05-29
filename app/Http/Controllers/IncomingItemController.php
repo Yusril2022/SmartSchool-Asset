@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Item;
 use App\Models\IncomingItem;
 use App\Services\ItemService;
+use App\Exports\IncomingItemExport;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class IncomingItemController extends Controller
 {
@@ -41,6 +43,12 @@ class IncomingItemController extends Controller
         $data = $query->paginate(15)->withQueryString();
     
         return view('admin.incoming-items.index', compact('data'));
+    }
+
+    public function export(Request $request)
+    {
+        $filename = 'barang-masuk-' . now()->format('Ymd-His') . '.xlsx';
+        return Excel::download(new IncomingItemExport($request), $filename);
     }
 
         public function create(): View

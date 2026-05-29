@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Item;
 use App\Models\Cabinet;
+use App\Exports\ItemExport;
 use Illuminate\Http\Request;
 use App\Services\ItemService;
 use App\Models\Room;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ItemController extends Controller
 {
@@ -34,6 +36,12 @@ class ItemController extends Controller
         $barangs = $query->paginate(15)->withQueryString();
 
         return view('admin.items.index', compact('barangs'));
+    }
+
+    public function export(Request $request)
+    {
+        $filename = 'barang-' . now()->format('Ymd-His') . '.xlsx';
+        return Excel::download(new ItemExport($request), $filename);
     }
 
     public function create()

@@ -48,16 +48,17 @@
                         Reset
                     </a>
                     @endif
+                    <a href="{{ route('items.create') }}"
+                        class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg shadow-sm transition">
+                        Tambah
+                    </a>
+                    <a href="{{ route('items.export', request()->query()) }}"
+                        class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow-sm transition text-sm whitespace-nowrap">
+                        ⬇ Export Excel
+                    </a>
 
                 </form>
             </div>
-
-            <!-- BUTTON -->
-            <a href="{{ route('items.create') }}"
-                class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg shadow-sm transition">
-                Tambah
-            </a>
-
         </div>
 
     </div>

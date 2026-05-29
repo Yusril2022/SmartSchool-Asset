@@ -61,14 +61,20 @@
 
             <!-- TOMBOL -->
             <div class="md:col-span-4 flex gap-3 justify-end">
+                @if(request('dari') || request('sampai') || request('nama') || request('barang'))
                 <a href="{{ route('admin.item-usages.index') }}"
                     class="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-100 transition text-sm">
                     Reset
                 </a>
+                @endif
                 <button type="submit"
                     class="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition text-sm">
                     Filter
                 </button>
+                <a href="{{ route('admin.item-usages.export', request()->query()) }}"
+                    class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow-sm transition text-sm">
+                    ⬇ Export Excel
+                </a>
             </div>
 
         </form>

@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Item;
 use App\Models\ItemUsage;
 use App\Services\ItemService;
+use App\Exports\ItemUsageExport;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ItemUsageController extends Controller
 {
@@ -60,6 +62,12 @@ class ItemUsageController extends Controller
             'totalPegawai',
             'items',
         ));
+    }
+
+    public function export(Request $request)
+    {
+        $filename = 'pengambilan-' . now()->format('Ymd-His') . '.xlsx';
+        return Excel::download(new ItemUsageExport($request), $filename);
     }
 
     public function create($id)

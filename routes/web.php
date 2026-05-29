@@ -59,11 +59,19 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('rooms', RoomController::class);
     Route::resource('cabinets', CabinetController::class);
+
+    // --- MULAI PERBAIKAN: Export diletakkan tepat di atas resource masing-masing ---
+    
+    Route::get('items/export', [ItemController::class, 'export'])->name('items.export');
     Route::resource('items', ItemController::class);
 
-    Route::resource('incoming-items', IncomingItemController::class)
-        ->only(['index', 'create', 'store']);
+    Route::get('incoming-items/export', [IncomingItemController::class, 'export'])->name('incoming-items.export');
+    Route::resource('incoming-items', IncomingItemController::class)->only(['index', 'create', 'store']);
 
+    Route::get('admin/item-usages/export', [ItemUsageController::class, 'export'])->name('admin.item-usages.export');
+    Route::get('admin/item-usages', [ItemUsageController::class, 'adminIndex'])->name('admin.item-usages.index');
+
+    Route::get('admin/borrowings/export', [BorrowingController::class, 'export'])->name('admin.borrowings.export');
     Route::resource('admin/borrowings', BorrowingController::class)
         ->only(['index', 'show', 'update'])
         ->names([
@@ -71,12 +79,11 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
             'show'   => 'admin.borrowings.show',
             'update' => 'admin.borrowings.update',
         ]);
-    
-    Route::get('admin/borrowings/{id}/berita-acara', [BorrowingController::class, 'downloadBeritaAcara'])
-    ->name('admin.borrowings.berita-acara');
+        
+    // --- AKHIR PERBAIKAN ---
 
-    Route::get('admin/item-usages', [ItemUsageController::class, 'adminIndex'])
-        ->name('admin.item-usages.index');
+    Route::get('admin/borrowings/{id}/berita-acara', [BorrowingController::class, 'downloadBeritaAcara'])
+        ->name('admin.borrowings.berita-acara');
 
     Route::resource('documents', DocumentController::class)
         ->only(['index', 'create', 'store',  'show', 'destroy']);
@@ -88,8 +95,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         ->name('items.qr');
         
     Route::get('asset-position', [AssetPositionController::class, 'index'])
-    ->name('asset-position.index');
-    
+        ->name('asset-position.index');
+        
     Route::get('asset-position/print', [AssetPositionController::class, 'print'])
         ->name('asset-position.print');
 });

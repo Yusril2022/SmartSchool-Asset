@@ -60,6 +60,10 @@
                     class="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition text-sm">
                     Filter
                 </button>
+                <a href="{{ route('incoming-items.export', request()->query()) }}"
+                    class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow-sm transition text-sm">
+                    ⬇ Export Excel
+                </a>
             </div>
 
         </form>

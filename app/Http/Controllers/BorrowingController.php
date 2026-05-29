@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Item;
 use App\Models\Borrowing;
+use App\Exports\BorrowingExport;
 use Illuminate\Http\Request;
 use App\Services\BorrowingService;
 use App\Services\DocumentService;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BorrowingController extends Controller
 {
@@ -28,6 +30,15 @@ class BorrowingController extends Controller
         }
 
         return $this->documentService->streamBeritaAcara($borrowing);
+    }
+
+    // =========================================================
+    // EXPORT EXCEL — filter sama seperti di list
+    // ==========================================================
+    public function export(Request $request)
+    {
+        $filename = 'peminjaman-' . now()->format('Ymd-His') . '.xlsx';
+        return Excel::download(new BorrowingExport($request), $filename);
     }
 
     // =========================================================
