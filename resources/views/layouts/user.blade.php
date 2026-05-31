@@ -64,6 +64,13 @@
                     <span x-show="!collapse" class="truncate">Peminjaman</span>
                 </a>
 
+                <a href="{{ route('ambil.form') }}"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition text-sm
+                   {{ request()->routeIs('ambil.*') ? 'bg-orange-500 text-white shadow' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <span class="text-base shrink-0">🛒</span>
+                    <span x-show="!collapse" class="truncate">Ambil Barang</span>
+                </a>
+
             </nav>
 
             {{-- LOGOUT --}}

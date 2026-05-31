@@ -67,8 +67,17 @@
             {{-- DIVIDER --}}
             <div class="my-5 flex items-center gap-3">
                 <div class="flex-1 h-px bg-purple-500/30"></div>
+                <span class="text-white/50 text-xs">atau</span>
                 <div class="flex-1 h-px bg-purple-500/30"></div>
             </div>
+
+            {{-- AMBIL BARANG PUBLIC --}}
+            <a href="{{ route('ambil.form') }}"
+                class="w-full py-2.5 rounded-lg border border-white/30 hover:border-orange-400 text-white text-sm font-medium transition flex items-center justify-center gap-2"
+                style="background: rgba(255,255,255,0.07)">
+                📦 Ambil Barang Habis Pakai
+            </a>
+            <p class="text-center text-xs text-white/40 mt-2">Tidak perlu login untuk mengambil barang habis pakai</p>
 
             <!-- {{-- SOCIAL --}}
             <div class="flex gap-3">

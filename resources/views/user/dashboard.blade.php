@@ -19,34 +19,27 @@
 
 
     <!-- QUICK ACTION -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
         <!-- PINJAM -->
         <a href="{{ route('items.user') }}"
             class="bg-orange-500 hover:bg-orange-600 transition rounded-2xl p-6 text-white shadow-sm flex flex-col gap-2">
+            <span class="text-lg font-semibold">📦 Pinjam Barang</span>
+            <span class="text-sm text-orange-100">Lihat daftar barang yang tersedia</span>
+        </a>
 
-            <span class="text-lg font-semibold">
-                📦 Pinjam Barang
-            </span>
-
-            <span class="text-sm text-orange-100">
-                Lihat daftar barang yang tersedia
-            </span>
-
+        <!-- AMBIL KONSUMSI -->
+        <a href="{{ route('ambil.form') }}"
+            class="bg-green-500 hover:bg-green-600 transition rounded-2xl p-6 text-white shadow-sm flex flex-col gap-2">
+            <span class="text-lg font-semibold">🛒 Ambil Barang</span>
+            <span class="text-sm text-green-100">Ambil barang habis pakai (ATK, dll)</span>
         </a>
 
         <!-- RIWAYAT -->
         <a href="{{ route('borrowings.index') }}"
             class="bg-white border border-gray-200 hover:bg-gray-50 transition rounded-2xl p-6 text-gray-800 shadow-sm flex flex-col gap-2">
-
-            <span class="text-lg font-semibold">
-                📄 Riwayat Peminjaman
-            </span>
-
-            <span class="text-sm text-gray-500">
-                Lihat status dan histori peminjaman
-            </span>
-
+            <span class="text-lg font-semibold">📄 Riwayat Peminjaman</span>
+            <span class="text-sm text-gray-500">Lihat status dan histori peminjaman</span>
         </a>
 
     </div>
