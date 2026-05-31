@@ -1,0 +1,3080 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "SmartSchool Asset API",
+        "description": "Dokumentasi API untuk sistem manajemen aset SmartSchool. Mencakup peminjaman barang, pengambilan konsumsi, barang masuk, dan laporan.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Local Development Server"
+        }
+    ],
+    "paths": {
+        "/api/borrowings/terlambat": {
+            "get": {
+                "tags": [
+                    "API - Laporan"
+                ],
+                "summary": "Daftar peminjaman yang terlambat dikembalikan",
+                "description": "Mengembalikan semua peminjaman berstatus 'dipinjam' yang melewati tanggal/jam kembali. Digunakan oleh n8n untuk notifikasi otomatis.",
+                "operationId": "23da7d58f8f8ab4e3ce03e95be4ca2e3",
+                "responses": {
+                    "200": {
+                        "description": "Daftar peminjaman terlambat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "ok"
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 3
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "kode_peminjaman": {
+                                                        "type": "string",
+                                                        "example": "BRW-20240101-001"
+                                                    },
+                                                    "nama_peminjam": {
+                                                        "type": "string",
+                                                        "example": "Budi Santoso"
+                                                    },
+                                                    "email_peminjam": {
+                                                        "type": "string",
+                                                        "example": "budi@sekolah.sch.id"
+                                                    },
+                                                    "no_hp": {
+                                                        "type": "string",
+                                                        "example": "081234567890"
+                                                    },
+                                                    "nama_barang": {
+                                                        "type": "string",
+                                                        "example": "Laptop Dell"
+                                                    },
+                                                    "jumlah_pinjam": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "tanggal_kembali": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2024-05-01"
+                                                    },
+                                                    "jam_kembali": {
+                                                        "type": "string",
+                                                        "example": "14:00"
+                                                    },
+                                                    "terlambat": {
+                                                        "type": "string",
+                                                        "example": "3 hari yang lalu"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/stok-kritis": {
+            "get": {
+                "tags": [
+                    "API - Laporan"
+                ],
+                "summary": "Daftar barang dengan stok di bawah batas minimum",
+                "description": "Mengembalikan semua barang yang stok totalnya kurang dari atau sama dengan batas minimum.",
+                "operationId": "b4471893c13fce0c46e9d1c858189ddb",
+                "responses": {
+                    "200": {
+                        "description": "Daftar barang stok kritis",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "ok"
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "kode_barang": {
+                                                        "type": "string",
+                                                        "example": "BRG-001"
+                                                    },
+                                                    "nama_barang": {
+                                                        "type": "string",
+                                                        "example": "Spidol Whiteboard"
+                                                    },
+                                                    "jenis_barang": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "aset",
+                                                            "konsumsi"
+                                                        ],
+                                                        "example": "konsumsi"
+                                                    },
+                                                    "stok_total": {
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    },
+                                                    "batas_minimum": {
+                                                        "type": "integer",
+                                                        "example": 10
+                                                    },
+                                                    "selisih": {
+                                                        "type": "integer",
+                                                        "example": 8
+                                                    },
+                                                    "lokasi": {
+                                                        "type": "string",
+                                                        "example": "Ruang Guru"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/laporan/peminjaman": {
+            "get": {
+                "tags": [
+                    "API - Laporan"
+                ],
+                "summary": "Laporan peminjaman per bulan",
+                "description": "Mengembalikan daftar semua peminjaman pada bulan dan tahun yang ditentukan.",
+                "operationId": "8c9e596f800092fe4f830457cf976a3e",
+                "parameters": [
+                    {
+                        "name": "bulan",
+                        "in": "query",
+                        "description": "Bulan (1-12), default bulan ini",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    },
+                    {
+                        "name": "tahun",
+                        "in": "query",
+                        "description": "Tahun, default tahun ini",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2025
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Laporan peminjaman bulanan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "ok"
+                                        },
+                                        "bulan": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "tahun": {
+                                            "type": "integer",
+                                            "example": 2025
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 12
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "kode_peminjaman": {
+                                                        "type": "string",
+                                                        "example": "BRW-20240501-001"
+                                                    },
+                                                    "nama_peminjam": {
+                                                        "type": "string",
+                                                        "example": "Siti Aminah"
+                                                    },
+                                                    "nama_barang": {
+                                                        "type": "string",
+                                                        "example": "Proyektor Epson"
+                                                    },
+                                                    "jumlah_pinjam": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "tanggal_pinjam": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-05-03"
+                                                    },
+                                                    "tanggal_kembali": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-05-05"
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "pending",
+                                                            "dipinjam",
+                                                            "dikembalikan",
+                                                            "ditolak"
+                                                        ],
+                                                        "example": "dikembalikan"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/laporan/pengambilan": {
+            "get": {
+                "tags": [
+                    "API - Laporan"
+                ],
+                "summary": "Laporan pengambilan konsumsi per bulan",
+                "description": "Mengembalikan daftar pengambilan barang konsumsi pada bulan dan tahun yang ditentukan.",
+                "operationId": "f681a51e162113feb237785a9f26f518",
+                "parameters": [
+                    {
+                        "name": "bulan",
+                        "in": "query",
+                        "description": "Bulan (1-12), default bulan ini",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    },
+                    {
+                        "name": "tahun",
+                        "in": "query",
+                        "description": "Tahun, default tahun ini",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2025
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Laporan pengambilan bulanan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "ok"
+                                        },
+                                        "bulan": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "tahun": {
+                                            "type": "integer",
+                                            "example": 2025
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 30
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "nama_pengambil": {
+                                                        "type": "string",
+                                                        "example": "Ahmad Fauzi"
+                                                    },
+                                                    "sebagai": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "murid",
+                                                            "pegawai"
+                                                        ],
+                                                        "example": "murid"
+                                                    },
+                                                    "nama_barang": {
+                                                        "type": "string",
+                                                        "example": "Kertas A4"
+                                                    },
+                                                    "jumlah_ambil": {
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    },
+                                                    "tanggal_ambil": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-05-10"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/laporan/barang-masuk": {
+            "get": {
+                "tags": [
+                    "API - Laporan"
+                ],
+                "summary": "Laporan barang masuk per bulan",
+                "description": "Mengembalikan daftar pencatatan barang masuk pada bulan dan tahun yang ditentukan.",
+                "operationId": "4b1d791acc834c9aa8ae3e9dfaf128e9",
+                "parameters": [
+                    {
+                        "name": "bulan",
+                        "in": "query",
+                        "description": "Bulan (1-12), default bulan ini",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    },
+                    {
+                        "name": "tahun",
+                        "in": "query",
+                        "description": "Tahun, default tahun ini",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2025
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Laporan barang masuk bulanan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "ok"
+                                        },
+                                        "bulan": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "tahun": {
+                                            "type": "integer",
+                                            "example": 2025
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 8
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "nama_barang": {
+                                                        "type": "string",
+                                                        "example": "Spidol Whiteboard"
+                                                    },
+                                                    "jumlah_masuk": {
+                                                        "type": "integer",
+                                                        "example": 50
+                                                    },
+                                                    "tanggal_masuk": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-05-02"
+                                                    },
+                                                    "dicatat_oleh": {
+                                                        "type": "string",
+                                                        "example": "Admin Sekolah"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/rekap-hari-ini": {
+            "get": {
+                "tags": [
+                    "API - Laporan"
+                ],
+                "summary": "Rekap aktivitas hari ini",
+                "description": "Mengembalikan ringkasan jumlah aktivitas hari ini: barang masuk, pengambilan, peminjaman baru, pending, dan stok kritis.",
+                "operationId": "125395e60ab080067628f0e0cbedf98e",
+                "responses": {
+                    "200": {
+                        "description": "Rekap hari ini",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "ok"
+                                        },
+                                        "tanggal": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2025-05-30"
+                                        },
+                                        "barang_masuk": {
+                                            "type": "integer",
+                                            "example": 2
+                                        },
+                                        "pengambilan": {
+                                            "type": "integer",
+                                            "example": 15
+                                        },
+                                        "peminjaman_baru": {
+                                            "type": "integer",
+                                            "example": 3
+                                        },
+                                        "pending": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "stok_kritis": {
+                                            "type": "integer",
+                                            "example": 4
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/borrowings/tandai-notifikasi": {
+            "post": {
+                "tags": [
+                    "API - Laporan"
+                ],
+                "summary": "Tandai notifikasi peminjaman sudah terkirim",
+                "description": "Digunakan oleh n8n setelah berhasil mengirim notifikasi, agar peminjaman tidak dinotifikasi ulang dalam 24 jam.",
+                "operationId": "82e208b2ba30cdec543702c8f2d649af",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "kode_peminjaman"
+                                ],
+                                "properties": {
+                                    "kode_peminjaman": {
+                                        "type": "string",
+                                        "example": "BRW-20240101-001"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Berhasil ditandai",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "ok"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/asset-position": {
+            "get": {
+                "tags": [
+                    "Posisi Aset"
+                ],
+                "summary": "Laporan posisi aset per ruangan (admin)",
+                "description": "Menampilkan halaman laporan posisi aset. Mengelompokkan barang aset berdasarkan ruangan dan lemari. Hanya untuk admin.",
+                "operationId": "bd46cd8bf26bdce9d9073847ba6b9e2a",
+                "responses": {
+                    "200": {
+                        "description": "Halaman laporan posisi aset"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/asset-position/print": {
+            "get": {
+                "tags": [
+                    "Posisi Aset"
+                ],
+                "summary": "Cetak laporan posisi aset (admin)",
+                "description": "Menampilkan halaman cetak laporan posisi aset. Dapat difilter berdasarkan ruangan tertentu. Jika tidak memilih ruangan, semua ruangan yang memiliki aset akan ditampilkan.",
+                "operationId": "6c069a10f53661007e750f9ab2297d20",
+                "parameters": [
+                    {
+                        "name": "room_ids[]",
+                        "in": "query",
+                        "description": "ID ruangan yang ingin dicetak. Bisa pilih lebih dari satu. Kosongkan untuk semua ruangan.",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            },
+                            "example": [
+                                1,
+                                2,
+                                3
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Halaman cetak laporan posisi aset"
+                    },
+                    "422": {
+                        "description": "Validasi gagal (room_ids tidak valid)"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/borrowings/{id}/berita-acara": {
+            "get": {
+                "tags": [
+                    "Peminjaman"
+                ],
+                "summary": "Download berita acara peminjaman (PDF)",
+                "description": "Generate dan download berita acara peminjaman untuk barang bernilai di atas Rp10.000.000. Hanya untuk admin.",
+                "operationId": "e76b95bb988c41a0de258072afe315ba",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID peminjaman",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File PDF berita acara"
+                    },
+                    "302": {
+                        "description": "Redirect dengan error jika harga barang <= 10 juta"
+                    },
+                    "404": {
+                        "description": "Peminjaman tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/borrowings/export": {
+            "get": {
+                "tags": [
+                    "Peminjaman"
+                ],
+                "summary": "Export data peminjaman ke Excel",
+                "description": "Download file Excel berisi data peminjaman. Mendukung filter yang sama dengan halaman daftar peminjaman. Hanya untuk admin.",
+                "operationId": "275db8d1fdb8ed0199329ec5df7d225c",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "semua",
+                                "pending",
+                                "dipinjam",
+                                "dikembalikan",
+                                "ditolak",
+                                "terlambat"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Nama peminjam",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "dari",
+                        "in": "query",
+                        "description": "Tanggal mulai (Y-m-d)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "sampai",
+                        "in": "query",
+                        "description": "Tanggal akhir (Y-m-d)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File Excel (.xlsx)"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/borrowings": {
+            "get": {
+                "tags": [
+                    "Peminjaman"
+                ],
+                "summary": "Daftar semua peminjaman (admin)",
+                "description": "Menampilkan semua peminjaman dengan filter status, pencarian nama peminjam, dan rentang tanggal. Hanya untuk admin.",
+                "operationId": "e17f2145d73d54c0c8d438536a0430fa",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "semua",
+                                "pending",
+                                "dipinjam",
+                                "dikembalikan",
+                                "ditolak",
+                                "terlambat"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Nama peminjam",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "dari",
+                        "in": "query",
+                        "description": "Tanggal mulai (Y-m-d)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "sampai",
+                        "in": "query",
+                        "description": "Tanggal akhir (Y-m-d)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Halaman daftar peminjaman"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/borrowings/create/{id}": {
+            "get": {
+                "tags": [
+                    "Peminjaman"
+                ],
+                "summary": "Form pengajuan peminjaman barang aset",
+                "description": "Menampilkan form peminjaman untuk barang aset tertentu. Hanya untuk siswa dan guru. Barang konsumsi tidak bisa dipinjam lewat sini.",
+                "operationId": "7a0b082733c13204f40708206d2e5855",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID barang yang ingin dipinjam",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Halaman form peminjaman"
+                    },
+                    "302": {
+                        "description": "Redirect dengan error jika barang adalah konsumsi"
+                    },
+                    "404": {
+                        "description": "Barang tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/borrowings": {
+            "post": {
+                "tags": [
+                    "Peminjaman"
+                ],
+                "summary": "Ajukan peminjaman barang aset",
+                "description": "Menyimpan pengajuan peminjaman. Status awal adalah 'pending' menunggu persetujuan admin. Untuk barang <= Rp10 juta, tanggal kembali wajib diisi.",
+                "operationId": "d1d217e3ddf9d5b202176cc39d684afb",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id_barang",
+                                    "jumlah_pinjam",
+                                    "tujuan_pinjam"
+                                ],
+                                "properties": {
+                                    "id_barang": {
+                                        "description": "ID barang yang dipinjam",
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "jumlah_pinjam": {
+                                        "description": "Jumlah barang yang dipinjam (min: 1)",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "tujuan_pinjam": {
+                                        "description": "Tujuan peminjaman",
+                                        "type": "string",
+                                        "example": "Digunakan untuk presentasi kelas"
+                                    },
+                                    "tanggal_kembali": {
+                                        "description": "Wajib diisi jika harga barang <= Rp10 juta",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-06-01"
+                                    },
+                                    "jam_kembali": {
+                                        "description": "Opsional, format HH:MM",
+                                        "type": "string",
+                                        "example": "14:00"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect ke daftar peminjaman jika berhasil"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/borrowings/{id}": {
+            "put": {
+                "tags": [
+                    "Peminjaman"
+                ],
+                "summary": "Ubah status peminjaman (approve / tolak / kembalikan)",
+                "description": "Admin dapat menyetujui (approve), menolak (tolak), atau menandai barang sudah dikembalikan (kembali).",
+                "operationId": "ac02863d3fd7cab3891edb286cd02410",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID peminjaman",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "action"
+                                ],
+                                "properties": {
+                                    "action": {
+                                        "type": "string",
+                                        "enum": [
+                                            "approve",
+                                            "tolak",
+                                            "kembali"
+                                        ],
+                                        "example": "approve"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect dengan pesan sukses"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    },
+                    "404": {
+                        "description": "Peminjaman tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/borrowings/{id}": {
+            "get": {
+                "tags": [
+                    "Peminjaman"
+                ],
+                "summary": "Detail peminjaman",
+                "description": "Menampilkan detail satu peminjaman. Admin melihat semua peminjaman; user biasa hanya bisa melihat milik sendiri.",
+                "operationId": "b0d57a1eca8c2f16ffc04426ed98c96c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID peminjaman",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Halaman detail peminjaman"
+                    },
+                    "404": {
+                        "description": "Peminjaman tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/cabinets": {
+            "get": {
+                "tags": [
+                    "Lemari"
+                ],
+                "summary": "Daftar semua lemari (admin)",
+                "description": "Menampilkan daftar semua lemari beserta ruangan tempatnya berada. Hanya untuk admin.",
+                "operationId": "6db282f88b4f1cb20244726f76f318f9",
+                "responses": {
+                    "200": {
+                        "description": "Halaman daftar lemari"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Lemari"
+                ],
+                "summary": "Simpan lemari baru (admin)",
+                "description": "Menyimpan data lemari baru ke sistem. Kode lemari harus unik dan ruangan wajib dipilih.",
+                "operationId": "45daa56e96aa32bb3382b533ff62bd66",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "kode_lemari",
+                                    "nama_lemari",
+                                    "id_ruangan"
+                                ],
+                                "properties": {
+                                    "kode_lemari": {
+                                        "description": "Kode unik lemari",
+                                        "type": "string",
+                                        "example": "L-01"
+                                    },
+                                    "nama_lemari": {
+                                        "type": "string",
+                                        "example": "Lemari Elektronik"
+                                    },
+                                    "id_ruangan": {
+                                        "description": "ID ruangan tempat lemari berada",
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect ke daftar lemari jika berhasil"
+                    },
+                    "422": {
+                        "description": "Validasi gagal (kode sudah dipakai atau ruangan tidak ada)"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/cabinets/create": {
+            "get": {
+                "tags": [
+                    "Lemari"
+                ],
+                "summary": "Form tambah lemari (admin)",
+                "description": "Menampilkan form untuk menambahkan lemari baru. Hanya untuk admin.",
+                "operationId": "1f3d83b828c9ab14c354ea692583ad42",
+                "responses": {
+                    "200": {
+                        "description": "Halaman form tambah lemari"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/cabinets/{id}/edit": {
+            "get": {
+                "tags": [
+                    "Lemari"
+                ],
+                "summary": "Form edit lemari (admin)",
+                "description": "Menampilkan form untuk mengedit data lemari. Hanya untuk admin.",
+                "operationId": "9eea6c957005a727b857baf0470c2055",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Halaman form edit lemari"
+                    },
+                    "404": {
+                        "description": "Lemari tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/cabinets/{id}": {
+            "put": {
+                "tags": [
+                    "Lemari"
+                ],
+                "summary": "Update data lemari (admin)",
+                "description": "Mengupdate data lemari. Kode lemari harus unik kecuali milik lemari itu sendiri.",
+                "operationId": "c393371d19fe9f416c96b46fcd2f3d84",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "kode_lemari",
+                                    "nama_lemari",
+                                    "id_ruangan"
+                                ],
+                                "properties": {
+                                    "kode_lemari": {
+                                        "type": "string",
+                                        "example": "L-01"
+                                    },
+                                    "nama_lemari": {
+                                        "type": "string",
+                                        "example": "Lemari ATK"
+                                    },
+                                    "id_ruangan": {
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect ke daftar lemari jika berhasil"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    },
+                    "404": {
+                        "description": "Lemari tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Lemari"
+                ],
+                "summary": "Hapus lemari (admin)",
+                "description": "Menghapus data lemari dari sistem. Hanya untuk admin.",
+                "operationId": "e06934492e8df09b32010e4296a9f5ed",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Redirect dengan pesan sukses"
+                    },
+                    "404": {
+                        "description": "Lemari tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/documents": {
+            "get": {
+                "tags": [
+                    "Dokumen"
+                ],
+                "summary": "Daftar semua dokumen (admin)",
+                "description": "Menampilkan daftar semua dokumen arsip dengan filter judul dan rentang tanggal. Hanya untuk admin.",
+                "operationId": "cf58d1781992e8292fd9914b24487fdc",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Cari berdasarkan judul dokumen",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Berita Acara"
+                        }
+                    },
+                    {
+                        "name": "dari",
+                        "in": "query",
+                        "description": "Tanggal mulai (Y-m-d)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-05-01"
+                        }
+                    },
+                    {
+                        "name": "sampai",
+                        "in": "query",
+                        "description": "Tanggal akhir (Y-m-d)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-05-31"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Halaman daftar dokumen"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Dokumen"
+                ],
+                "summary": "Simpan dokumen baru (admin)",
+                "description": "Menyimpan dokumen arsip baru. File yang diizinkan: PDF, JPG, JPEG, PNG (max 5MB).",
+                "operationId": "1c3ad2906b68a58de1f603260ab271c4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "judul_dokumen",
+                                    "jenis_dokumen",
+                                    "tanggal_dokumen"
+                                ],
+                                "properties": {
+                                    "judul_dokumen": {
+                                        "type": "string",
+                                        "example": "Berita Acara Serah Terima Laptop"
+                                    },
+                                    "jenis_dokumen": {
+                                        "description": "Jenis/kategori dokumen",
+                                        "type": "string",
+                                        "example": "Berita Acara"
+                                    },
+                                    "no_dokumen": {
+                                        "description": "Nomor dokumen (opsional)",
+                                        "type": "string",
+                                        "example": "BA/001/2025"
+                                    },
+                                    "tanggal_dokumen": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-05-30"
+                                    },
+                                    "pihak_terkait": {
+                                        "description": "Pihak yang terkait dalam dokumen (opsional)",
+                                        "type": "string",
+                                        "example": "Dinas Pendidikan"
+                                    },
+                                    "keterangan": {
+                                        "description": "Keterangan tambahan (opsional)",
+                                        "type": "string",
+                                        "example": "Dokumen serah terima 5 unit laptop"
+                                    },
+                                    "file_path": {
+                                        "description": "File dokumen (pdf/jpg/jpeg/png, max 5MB, opsional)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect ke daftar dokumen jika berhasil"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/documents/create": {
+            "get": {
+                "tags": [
+                    "Dokumen"
+                ],
+                "summary": "Form upload dokumen (admin)",
+                "description": "Menampilkan form untuk mengupload dokumen arsip baru secara manual. Hanya untuk admin.",
+                "operationId": "600d8b590b02f43498a5025c6f9c7330",
+                "responses": {
+                    "200": {
+                        "description": "Halaman form upload dokumen"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/documents/{id}": {
+            "get": {
+                "tags": [
+                    "Dokumen"
+                ],
+                "summary": "Lihat dokumen (admin)",
+                "description": "Menampilkan halaman preview dokumen. Jika file tidak ditemukan di storage, akan redirect dengan pesan error.",
+                "operationId": "9cf5289c9ad15ddb6da247477998f54b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID dokumen",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Halaman preview dokumen"
+                    },
+                    "302": {
+                        "description": "Redirect dengan error jika file tidak ditemukan"
+                    },
+                    "404": {
+                        "description": "Dokumen tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Dokumen"
+                ],
+                "summary": "Hapus dokumen (admin)",
+                "description": "Menghapus dokumen beserta file-nya dari storage. Hanya untuk admin.",
+                "operationId": "797f07f3ce355da8e70bf49bb13caa6f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID dokumen",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Redirect dengan pesan sukses"
+                    },
+                    "404": {
+                        "description": "Dokumen tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/documents/{id}/download": {
+            "get": {
+                "tags": [
+                    "Dokumen"
+                ],
+                "summary": "Download file dokumen (admin)",
+                "description": "Mendownload file dokumen langsung ke perangkat pengguna.",
+                "operationId": "ec38afe36268518adfa2badec935ae7c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID dokumen",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File dokumen (pdf/jpg/jpeg/png)"
+                    },
+                    "302": {
+                        "description": "Redirect dengan error jika file tidak ditemukan"
+                    },
+                    "404": {
+                        "description": "Dokumen tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/incoming-items": {
+            "get": {
+                "tags": [
+                    "Barang Masuk"
+                ],
+                "summary": "Daftar barang masuk",
+                "description": "Menampilkan riwayat semua pencatatan barang masuk dengan filter nama barang dan rentang tanggal. Hanya untuk admin.",
+                "operationId": "e0b6668d127614fe26bfc4fc3a6af5f8",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Nama barang",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Spidol"
+                        }
+                    },
+                    {
+                        "name": "dari",
+                        "in": "query",
+                        "description": "Tanggal mulai (Y-m-d)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-05-01"
+                        }
+                    },
+                    {
+                        "name": "sampai",
+                        "in": "query",
+                        "description": "Tanggal akhir (Y-m-d)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-05-31"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Halaman daftar barang masuk"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Barang Masuk"
+                ],
+                "summary": "Catat barang masuk",
+                "description": "Menyimpan pencatatan barang masuk dan otomatis menambah stok barang yang bersangkutan.",
+                "operationId": "ccda836c518590edee2aa3db023135a0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id_barang",
+                                    "jumlah_masuk",
+                                    "tanggal_masuk"
+                                ],
+                                "properties": {
+                                    "id_barang": {
+                                        "description": "ID barang yang masuk",
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "jumlah_masuk": {
+                                        "description": "Jumlah barang yang masuk (min: 1)",
+                                        "type": "integer",
+                                        "example": 50
+                                    },
+                                    "tanggal_masuk": {
+                                        "description": "Tanggal barang masuk",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-05-30"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect ke daftar barang masuk jika berhasil"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/incoming-items/export": {
+            "get": {
+                "tags": [
+                    "Barang Masuk"
+                ],
+                "summary": "Export barang masuk ke Excel",
+                "description": "Download file Excel berisi data barang masuk. Mendukung filter yang sama dengan halaman daftar. Hanya untuk admin.",
+                "operationId": "f36779911c71d2e5f093224e03ab880b",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "dari",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "sampai",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File Excel (.xlsx)"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/incoming-items/create": {
+            "get": {
+                "tags": [
+                    "Barang Masuk"
+                ],
+                "summary": "Form pencatatan barang masuk",
+                "description": "Menampilkan form untuk mencatat barang masuk baru. Hanya untuk admin.",
+                "operationId": "1fc3c6aa0aa64d7b17a650fc2ac1487f",
+                "responses": {
+                    "200": {
+                        "description": "Halaman form barang masuk"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/items": {
+            "get": {
+                "tags": [
+                    "Barang"
+                ],
+                "summary": "Daftar semua barang (admin)",
+                "description": "Menampilkan daftar semua barang dengan filter nama dan jenis barang. Hanya untuk admin.",
+                "operationId": "38f04083708efa13b19c689b47445d64",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Cari berdasarkan nama barang",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Laptop"
+                        }
+                    },
+                    {
+                        "name": "jenis",
+                        "in": "query",
+                        "description": "Filter jenis barang",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "semua",
+                                "aset",
+                                "konsumsi"
+                            ],
+                            "example": "aset"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Halaman daftar barang admin"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Barang"
+                ],
+                "summary": "Simpan barang baru (admin)",
+                "description": "Menyimpan data barang baru ke sistem. Mendukung upload foto barang. Hanya untuk admin.",
+                "operationId": "5303a71efd2a2fd638dc3ce2bdda9997",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "nama_barang",
+                                    "kategori",
+                                    "jenis_barang",
+                                    "stok_awal",
+                                    "batas_minimum",
+                                    "harga"
+                                ],
+                                "properties": {
+                                    "nama_barang": {
+                                        "type": "string",
+                                        "example": "Laptop Dell Inspiron"
+                                    },
+                                    "kategori": {
+                                        "type": "string",
+                                        "example": "Elektronik"
+                                    },
+                                    "jenis_barang": {
+                                        "type": "string",
+                                        "enum": [
+                                            "aset",
+                                            "konsumsi"
+                                        ],
+                                        "example": "aset"
+                                    },
+                                    "merk": {
+                                        "type": "string",
+                                        "example": "Dell"
+                                    },
+                                    "hasil_perolehan": {
+                                        "type": "string",
+                                        "enum": [
+                                            "pembelian",
+                                            "hibah",
+                                            "sumbangan",
+                                            "dana_bos"
+                                        ],
+                                        "example": "pembelian"
+                                    },
+                                    "id_ruangan": {
+                                        "description": "ID ruangan (opsional, untuk filter lemari di form)",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "id_lemari": {
+                                        "description": "ID lemari tempat barang disimpan",
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "stok_awal": {
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "batas_minimum": {
+                                        "description": "Batas minimum stok sebelum dianggap kritis",
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "harga": {
+                                        "description": "Harga satuan barang dalam rupiah",
+                                        "type": "integer",
+                                        "example": 8000000
+                                    },
+                                    "foto": {
+                                        "description": "Foto barang (jpg/jpeg/png, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect ke daftar barang jika berhasil"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/items/export": {
+            "get": {
+                "tags": [
+                    "Barang"
+                ],
+                "summary": "Export data barang ke Excel",
+                "description": "Download file Excel berisi data semua barang. Mendukung filter yang sama dengan halaman daftar. Hanya untuk admin.",
+                "operationId": "727f877fb007a47dd7c716288e252009",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "jenis",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "semua",
+                                "aset",
+                                "konsumsi"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File Excel (.xlsx)"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/items/create": {
+            "get": {
+                "tags": [
+                    "Barang"
+                ],
+                "summary": "Form tambah barang baru (admin)",
+                "description": "Menampilkan form untuk menambahkan barang baru ke sistem. Hanya untuk admin.",
+                "operationId": "47ce0f40520af527045dc3143efa2e72",
+                "responses": {
+                    "200": {
+                        "description": "Halaman form tambah barang"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/items/{id}/edit": {
+            "get": {
+                "tags": [
+                    "Barang"
+                ],
+                "summary": "Form edit barang (admin)",
+                "description": "Menampilkan form untuk mengedit data barang beserta riwayat kondisi barang. Hanya untuk admin.",
+                "operationId": "a0dcdee17c961aa6677da593b640aee8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID barang",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Halaman form edit barang"
+                    },
+                    "404": {
+                        "description": "Barang tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/items/{id}": {
+            "put": {
+                "tags": [
+                    "Barang"
+                ],
+                "summary": "Update data barang (admin)",
+                "description": "Mengupdate data barang yang sudah ada. Foto lama tetap dipertahankan jika tidak ada foto baru yang diupload. Hanya untuk admin.",
+                "operationId": "4a2d683f0a5edace6de8e8d0d12c2ee9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID barang",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "nama_barang",
+                                    "kategori",
+                                    "jenis_barang",
+                                    "batas_minimum",
+                                    "harga"
+                                ],
+                                "properties": {
+                                    "nama_barang": {
+                                        "type": "string",
+                                        "example": "Laptop Dell Inspiron"
+                                    },
+                                    "kategori": {
+                                        "type": "string",
+                                        "example": "Elektronik"
+                                    },
+                                    "jenis_barang": {
+                                        "type": "string",
+                                        "enum": [
+                                            "aset",
+                                            "konsumsi"
+                                        ],
+                                        "example": "aset"
+                                    },
+                                    "id_lemari": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "batas_minimum": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "harga": {
+                                        "type": "integer",
+                                        "example": 8000000
+                                    },
+                                    "kondisi": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Baik",
+                                            "Rusak Ringan",
+                                            "Rusak Sedang",
+                                            "Rusak Berat",
+                                            "Mati Total"
+                                        ],
+                                        "example": "Baik"
+                                    },
+                                    "foto": {
+                                        "description": "Foto baru (opsional)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect ke daftar barang jika berhasil"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    },
+                    "404": {
+                        "description": "Barang tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Barang"
+                ],
+                "summary": "Hapus barang (admin)",
+                "description": "Menghapus data barang dari sistem. Hanya untuk admin.",
+                "operationId": "f7d8019e7a58101f594ab509931e3bb2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID barang yang akan dihapus",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Redirect dengan pesan sukses"
+                    },
+                    "404": {
+                        "description": "Barang tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/items/{id}/qr": {
+            "get": {
+                "tags": [
+                    "Barang"
+                ],
+                "summary": "Download QR Code barang (admin)",
+                "description": "Menampilkan halaman cetak QR Code untuk barang tertentu. Hanya untuk admin.",
+                "operationId": "2011274e464284d73da489ca0b308f93",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID barang",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Halaman cetak QR Code"
+                    },
+                    "404": {
+                        "description": "Barang tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/catalog": {
+            "get": {
+                "tags": [
+                    "Barang"
+                ],
+                "summary": "Katalog barang untuk user (siswa/guru)",
+                "description": "Menampilkan katalog semua barang yang bisa dilihat oleh siswa dan guru. Mendukung pencarian nama barang.",
+                "operationId": "789ab6970b26d166961582ed31a1a309",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Cari berdasarkan nama barang",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Proyektor"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Halaman katalog barang"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/catalog/{id}": {
+            "get": {
+                "tags": [
+                    "Barang"
+                ],
+                "summary": "Detail barang untuk user (siswa/guru)",
+                "description": "Menampilkan detail satu barang termasuk lokasi penyimpanannya.",
+                "operationId": "6b0b66e5d50235ab587a46714f1bce22",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID barang",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Halaman detail barang"
+                    },
+                    "404": {
+                        "description": "Barang tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/scan/{kode}": {
+            "get": {
+                "tags": [
+                    "Barang"
+                ],
+                "summary": "Scan QR Code barang (publik)",
+                "description": "Menampilkan detail barang berdasarkan kode QR yang di-scan. Dapat diakses tanpa login.",
+                "operationId": "3c410756fb953c721cce834d48feeed8",
+                "parameters": [
+                    {
+                        "name": "kode",
+                        "in": "path",
+                        "description": "Kode unik barang yang tertera pada QR Code",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "BRG-001"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Halaman detail barang hasil scan"
+                    },
+                    "404": {
+                        "description": "Barang dengan kode tersebut tidak ditemukan"
+                    }
+                }
+            }
+        },
+        "/item-usages": {
+            "get": {
+                "tags": [
+                    "Pengambilan Konsumsi"
+                ],
+                "summary": "Riwayat pengambilan konsumsi milik sendiri",
+                "description": "Menampilkan daftar pengambilan barang konsumsi yang dilakukan oleh user yang sedang login.",
+                "operationId": "f8f5d076c91ea1372785e431d2ffd1ec",
+                "responses": {
+                    "200": {
+                        "description": "Halaman riwayat pengambilan"
+                    },
+                    "401": {
+                        "description": "Belum login"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Pengambilan Konsumsi"
+                ],
+                "summary": "Simpan pengambilan konsumsi (user login)",
+                "description": "Menyimpan pengambilan barang konsumsi oleh user yang sedang login dan otomatis mengurangi stok.",
+                "operationId": "20959bc5c5dc00902a4d15fa4dc47438",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id_barang",
+                                    "jumlah_ambil"
+                                ],
+                                "properties": {
+                                    "id_barang": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "jumlah_ambil": {
+                                        "description": "Jumlah yang diambil (min: 1)",
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect ke riwayat pengambilan jika berhasil"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/item-usages": {
+            "get": {
+                "tags": [
+                    "Pengambilan Konsumsi"
+                ],
+                "summary": "Daftar semua pengambilan konsumsi (admin)",
+                "description": "Menampilkan semua pengambilan konsumsi dengan filter tanggal, nama pengambil, dan jenis barang. Hanya untuk admin.",
+                "operationId": "3b79af0719e1ad64e6ba1feefc212b6e",
+                "parameters": [
+                    {
+                        "name": "dari",
+                        "in": "query",
+                        "description": "Tanggal mulai (Y-m-d)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "sampai",
+                        "in": "query",
+                        "description": "Tanggal akhir (Y-m-d)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "nama",
+                        "in": "query",
+                        "description": "Nama pengambil",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "barang",
+                        "in": "query",
+                        "description": "ID barang",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Halaman daftar pengambilan admin"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/item-usages/export": {
+            "get": {
+                "tags": [
+                    "Pengambilan Konsumsi"
+                ],
+                "summary": "Export pengambilan konsumsi ke Excel",
+                "description": "Download file Excel berisi data pengambilan konsumsi. Mendukung filter yang sama dengan halaman daftar. Hanya untuk admin.",
+                "operationId": "cac412e0f7bd68e791af8c26a1d9f1dd",
+                "parameters": [
+                    {
+                        "name": "dari",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "sampai",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "nama",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "barang",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File Excel (.xlsx)"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/item-usages/{id}": {
+            "get": {
+                "tags": [
+                    "Pengambilan Konsumsi"
+                ],
+                "summary": "Form pengambilan barang konsumsi (user login)",
+                "description": "Menampilkan form pengambilan barang konsumsi. Barang aset tidak bisa diambil lewat sini.",
+                "operationId": "f60fd2280ee4822f0a0a5ca3b00a626f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID barang konsumsi",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Halaman form pengambilan"
+                    },
+                    "302": {
+                        "description": "Redirect dengan error jika barang bukan konsumsi"
+                    },
+                    "404": {
+                        "description": "Barang tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/ambil": {
+            "get": {
+                "tags": [
+                    "Pengambilan Konsumsi"
+                ],
+                "summary": "Form pengambilan konsumsi publik (tanpa login)",
+                "description": "Menampilkan form pengambilan barang konsumsi yang dapat diakses tanpa login. Dipanggil setelah scan QR barang.",
+                "operationId": "e305700a866ac8c3f556c51a6f8b1f8c",
+                "responses": {
+                    "200": {
+                        "description": "Halaman form pengambilan publik"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Pengambilan Konsumsi"
+                ],
+                "summary": "Proses pengambilan konsumsi publik (tanpa login)",
+                "description": "Memproses pengambilan barang konsumsi tanpa memerlukan login. Bisa mengambil lebih dari satu barang sekaligus dalam satu transaksi.",
+                "operationId": "ea70a87358d7b0b62be6af6c23693801",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nama_pengambil",
+                                    "sebagai",
+                                    "items"
+                                ],
+                                "properties": {
+                                    "nama_pengambil": {
+                                        "type": "string",
+                                        "example": "Ahmad Fauzi"
+                                    },
+                                    "sebagai": {
+                                        "type": "string",
+                                        "enum": [
+                                            "murid",
+                                            "pegawai"
+                                        ],
+                                        "example": "murid"
+                                    },
+                                    "items": {
+                                        "description": "Minimal 1 barang",
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "id_barang": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "jumlah_ambil": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect ke halaman sukses jika berhasil"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                }
+            }
+        },
+        "/ambil/sukses": {
+            "get": {
+                "tags": [
+                    "Pengambilan Konsumsi"
+                ],
+                "summary": "Halaman sukses setelah pengambilan publik",
+                "description": "Ditampilkan setelah pengambilan konsumsi publik berhasil diproses.",
+                "operationId": "16d4331a5f287c8a4a30b6e4fc465d84",
+                "responses": {
+                    "200": {
+                        "description": "Halaman sukses"
+                    }
+                }
+            }
+        },
+        "/rooms": {
+            "get": {
+                "tags": [
+                    "Ruangan"
+                ],
+                "summary": "Daftar semua ruangan (admin)",
+                "description": "Menampilkan daftar semua ruangan yang terdaftar di sistem. Hanya untuk admin.",
+                "operationId": "fc04f85434400dbf0e26d2ec77a5878d",
+                "responses": {
+                    "200": {
+                        "description": "Halaman daftar ruangan"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Ruangan"
+                ],
+                "summary": "Simpan ruangan baru (admin)",
+                "description": "Menyimpan data ruangan baru ke sistem. Kode ruangan harus unik.",
+                "operationId": "afb43684c849533c65e931df636b4de6",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "kode_ruangan",
+                                    "nama_ruangan"
+                                ],
+                                "properties": {
+                                    "kode_ruangan": {
+                                        "description": "Kode unik ruangan",
+                                        "type": "string",
+                                        "example": "R-01"
+                                    },
+                                    "nama_ruangan": {
+                                        "type": "string",
+                                        "example": "Ruang Guru"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect ke daftar ruangan jika berhasil"
+                    },
+                    "422": {
+                        "description": "Validasi gagal (kode sudah dipakai)"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/rooms/create": {
+            "get": {
+                "tags": [
+                    "Ruangan"
+                ],
+                "summary": "Form tambah ruangan (admin)",
+                "description": "Menampilkan form untuk menambahkan ruangan baru. Hanya untuk admin.",
+                "operationId": "56a94108c99bd608ba2873380a6f9ec5",
+                "responses": {
+                    "200": {
+                        "description": "Halaman form tambah ruangan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/rooms/{id}/edit": {
+            "get": {
+                "tags": [
+                    "Ruangan"
+                ],
+                "summary": "Form edit ruangan (admin)",
+                "description": "Menampilkan form untuk mengedit data ruangan. Hanya untuk admin.",
+                "operationId": "5ee8ee2dd7ee1a6437d0434e32d6ae9f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Halaman form edit ruangan"
+                    },
+                    "404": {
+                        "description": "Ruangan tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/rooms/{id}": {
+            "put": {
+                "tags": [
+                    "Ruangan"
+                ],
+                "summary": "Update data ruangan (admin)",
+                "description": "Mengupdate data ruangan. Kode ruangan harus unik kecuali milik ruangan itu sendiri.",
+                "operationId": "ea75b11760a871bba18cf5f9e43a5b70",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "kode_ruangan",
+                                    "nama_ruangan"
+                                ],
+                                "properties": {
+                                    "kode_ruangan": {
+                                        "type": "string",
+                                        "example": "R-01"
+                                    },
+                                    "nama_ruangan": {
+                                        "type": "string",
+                                        "example": "Ruang Kepala Sekolah"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect ke daftar ruangan jika berhasil"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    },
+                    "404": {
+                        "description": "Ruangan tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Ruangan"
+                ],
+                "summary": "Hapus ruangan (admin)",
+                "description": "Menghapus data ruangan dari sistem. Hanya untuk admin.",
+                "operationId": "cf9104dbefd91a81bebb07cafe7e70cf",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Redirect dengan pesan sukses"
+                    },
+                    "404": {
+                        "description": "Ruangan tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/users": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Daftar semua user (admin)",
+                "description": "Menampilkan daftar semua user yang terdaftar di sistem. Hanya untuk admin.",
+                "operationId": "7e2f5799553ec93c9c43e2a58490d447",
+                "responses": {
+                    "200": {
+                        "description": "Halaman daftar user"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Simpan user baru (admin)",
+                "description": "Membuat akun user baru dengan role tertentu. Email dan nomor induk harus unik.",
+                "operationId": "a1fce870c566eb5fc0cf3178ec5d2fed",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "nomor_induk",
+                                    "no_hp",
+                                    "email",
+                                    "password",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Budi Santoso"
+                                    },
+                                    "nomor_induk": {
+                                        "description": "NIS/NIP, harus unik",
+                                        "type": "string",
+                                        "example": "12345678"
+                                    },
+                                    "no_hp": {
+                                        "description": "Nomor HP (max 15 karakter)",
+                                        "type": "string",
+                                        "example": "081234567890"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "budi@sekolah.sch.id"
+                                    },
+                                    "password": {
+                                        "description": "Minimal 6 karakter",
+                                        "type": "string",
+                                        "example": "secret123"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "enum": [
+                                            "admin",
+                                            "guru",
+                                            "siswa"
+                                        ],
+                                        "example": "guru"
+                                    },
+                                    "jabatan": {
+                                        "description": "Opsional, khusus guru",
+                                        "type": "string",
+                                        "enum": [
+                                            "Kepala Sekolah",
+                                            "Wakasek Sarana dan Prasarana"
+                                        ],
+                                        "example": "Kepala Sekolah"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect ke daftar user jika berhasil"
+                    },
+                    "422": {
+                        "description": "Validasi gagal (email/nomor induk sudah dipakai)"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/users/create": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Form tambah user baru (admin)",
+                "description": "Menampilkan form untuk menambahkan user baru. Hanya untuk admin.",
+                "operationId": "bb980692892d97fb9e0a7c42914a8670",
+                "responses": {
+                    "200": {
+                        "description": "Halaman form tambah user"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/users/{id}": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Detail user (admin)",
+                "description": "Menampilkan detail informasi satu user. Hanya untuk admin.",
+                "operationId": "910a0c7cf580e1c605648d82a4e57f46",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Halaman detail user"
+                    },
+                    "404": {
+                        "description": "User tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Update data user (admin)",
+                "description": "Mengupdate data user. Password hanya diupdate jika diisi. Email dan nomor induk harus unik kecuali milik user itu sendiri.",
+                "operationId": "ddfe232db1870b82493bf8bd25596d37",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "nomor_induk",
+                                    "no_hp",
+                                    "email",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Budi Santoso"
+                                    },
+                                    "nomor_induk": {
+                                        "type": "string",
+                                        "example": "12345678"
+                                    },
+                                    "no_hp": {
+                                        "type": "string",
+                                        "example": "081234567890"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "budi@sekolah.sch.id"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "enum": [
+                                            "admin",
+                                            "guru",
+                                            "siswa"
+                                        ],
+                                        "example": "siswa"
+                                    },
+                                    "jabatan": {
+                                        "description": "Opsional",
+                                        "type": "string",
+                                        "enum": [
+                                            "Kepala Sekolah",
+                                            "Wakasek Sarana dan Prasarana"
+                                        ]
+                                    },
+                                    "password": {
+                                        "description": "Opsional, minimal 6 karakter. Kosongkan jika tidak ingin mengubah password.",
+                                        "type": "string",
+                                        "example": "newpassword"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect ke daftar user jika berhasil"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    },
+                    "404": {
+                        "description": "User tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Hapus user (admin)",
+                "description": "Menghapus user dari sistem. Admin tidak dapat menghapus akunnya sendiri.",
+                "operationId": "43dd20becb1f47444e484cbb18ce345c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2
+                        }
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Redirect dengan pesan sukses atau error jika menghapus akun sendiri"
+                    },
+                    "404": {
+                        "description": "User tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/users/{id}/edit": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Form edit user (admin)",
+                "description": "Menampilkan form untuk mengedit data user. Hanya untuk admin.",
+                "operationId": "546bfc762c779a955167c5e61a077352",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Halaman form edit user"
+                    },
+                    "404": {
+                        "description": "User tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "description": "Masukkan token autentikasi Laravel Sanctum/Session",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "API - Laporan",
+            "description": "Endpoint laporan & monitoring untuk integrasi eksternal (n8n, dsb)"
+        },
+        {
+            "name": "Peminjaman",
+            "description": "Manajemen peminjaman barang aset"
+        },
+        {
+            "name": "Barang Masuk",
+            "description": "Pencatatan barang masuk ke gudang"
+        },
+        {
+            "name": "Pengambilan Konsumsi",
+            "description": "Pengambilan barang konsumsi oleh siswa/guru"
+        },
+        {
+            "name": "Barang",
+            "description": "Manajemen data barang"
+        },
+        {
+            "name": "User",
+            "description": "Manajemen akun pengguna (admin)"
+        },
+        {
+            "name": "Ruangan",
+            "description": "Manajemen data ruangan (admin)"
+        },
+        {
+            "name": "Lemari",
+            "description": "Manajemen data lemari penyimpanan (admin)"
+        },
+        {
+            "name": "Dokumen",
+            "description": "Manajemen arsip dokumen (admin)"
+        },
+        {
+            "name": "Posisi Aset",
+            "description": "Laporan posisi dan lokasi barang aset (admin)"
+        }
+    ]
+}

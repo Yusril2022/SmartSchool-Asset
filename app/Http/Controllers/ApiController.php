@@ -8,14 +8,50 @@ use App\Models\IncomingItem;
 use App\Models\ItemUsage;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use OpenApi\Attributes as OA;
 
 class ApiController extends Controller
 {
     // =========================================================
     // 1. Peminjaman yang terlambat
     // =========================================================
-// SESUDAH — cek per jam dan per hari
-public function borrowingsTerlambat()
+
+    #[OA\Get(
+        path: "/api/borrowings/terlambat",
+        summary: "Daftar peminjaman yang terlambat dikembalikan",
+        description: "Mengembalikan semua peminjaman berstatus 'dipinjam' yang melewati tanggal/jam kembali. Digunakan oleh n8n untuk notifikasi otomatis.",
+        tags: ["API - Laporan"],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Daftar peminjaman terlambat",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "status", type: "string", example: "ok"),
+                        new OA\Property(property: "total", type: "integer", example: 3),
+                        new OA\Property(
+                            property: "data",
+                            type: "array",
+                            items: new OA\Items(
+                                properties: [
+                                    new OA\Property(property: "kode_peminjaman", type: "string", example: "BRW-20240101-001"),
+                                    new OA\Property(property: "nama_peminjam", type: "string", example: "Budi Santoso"),
+                                    new OA\Property(property: "email_peminjam", type: "string", example: "budi@sekolah.sch.id"),
+                                    new OA\Property(property: "no_hp", type: "string", example: "081234567890"),
+                                    new OA\Property(property: "nama_barang", type: "string", example: "Laptop Dell"),
+                                    new OA\Property(property: "jumlah_pinjam", type: "integer", example: 1),
+                                    new OA\Property(property: "tanggal_kembali", type: "string", format: "date", example: "2024-05-01"),
+                                    new OA\Property(property: "jam_kembali", type: "string", example: "14:00"),
+                                    new OA\Property(property: "terlambat", type: "string", example: "3 hari yang lalu"),
+                                ]
+                            )
+                        ),
+                    ]
+                )
+            )
+        ]
+    )]
+    public function borrowingsTerlambat()
     {
         $sekarang = now();
 
@@ -24,40 +60,30 @@ public function borrowingsTerlambat()
             ->whereNotNull('tanggal_kembali')
             ->get()
             ->filter(function ($b) use ($sekarang) {
-                
-                // Skip kalau sudah dinotifikasi dalam 24 jam terakhir
                 if ($b->notifikasi_terkirim_at) {
                     $sudahNotif = Carbon::parse($b->notifikasi_terkirim_at);
                     if ($sudahNotif->diffInHours($sekarang) < 24) {
-                        return false; // skip, jangan kirim lagi
+                        return false;
                     }
                 }
-
-                // Kalau ada jam kembali — cek per jam
                 if ($b->jam_kembali) {
-                    // PERBAIKAN: Bungkus dengan Carbon::parse sebelum di-format
                     $tanggalFormat = Carbon::parse($b->tanggal_kembali)->format('Y-m-d');
                     $deadlineJam = Carbon::parse($tanggalFormat . ' ' . $b->jam_kembali);
-                    
                     return $sekarang->gt($deadlineJam);
                 }
-
-                // Kalau tidak ada jam — cek per hari
                 return $sekarang->startOfDay()->gt(
                     Carbon::parse($b->tanggal_kembali)->startOfDay()
                 );
-
             })
             ->map(fn($b) => [
                 'kode_peminjaman'  => $b->kode_peminjaman,
                 'nama_peminjam'    => $b->user->name ?? '-',
-                'email_peminjam'  => $b->user->email ?? '-',
+                'email_peminjam'   => $b->user->email ?? '-',
                 'no_hp'            => $b->user->no_hp ?? '-',
                 'nama_barang'      => $b->item->nama_barang ?? '-',
                 'jumlah_pinjam'    => $b->jumlah_pinjam,
                 'tanggal_kembali'  => $b->tanggal_kembali,
                 'jam_kembali'      => $b->jam_kembali ?? 'Per hari',
-                // PERBAIKAN: Bungkus juga bagian format di bawah ini
                 'terlambat'        => $b->jam_kembali
                     ? Carbon::parse(Carbon::parse($b->tanggal_kembali)->format('Y-m-d') . ' ' . $b->jam_kembali)->diffForHumans()
                     : Carbon::parse($b->tanggal_kembali)->diffInDays(now()) . ' hari',
@@ -74,6 +100,40 @@ public function borrowingsTerlambat()
     // =========================================================
     // 2. Stok kritis
     // =========================================================
+
+    #[OA\Get(
+        path: "/api/stok-kritis",
+        summary: "Daftar barang dengan stok di bawah batas minimum",
+        description: "Mengembalikan semua barang yang stok totalnya kurang dari atau sama dengan batas minimum.",
+        tags: ["API - Laporan"],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Daftar barang stok kritis",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "status", type: "string", example: "ok"),
+                        new OA\Property(property: "total", type: "integer", example: 5),
+                        new OA\Property(
+                            property: "data",
+                            type: "array",
+                            items: new OA\Items(
+                                properties: [
+                                    new OA\Property(property: "kode_barang", type: "string", example: "BRG-001"),
+                                    new OA\Property(property: "nama_barang", type: "string", example: "Spidol Whiteboard"),
+                                    new OA\Property(property: "jenis_barang", type: "string", enum: ["aset", "konsumsi"], example: "konsumsi"),
+                                    new OA\Property(property: "stok_total", type: "integer", example: 2),
+                                    new OA\Property(property: "batas_minimum", type: "integer", example: 10),
+                                    new OA\Property(property: "selisih", type: "integer", example: 8),
+                                    new OA\Property(property: "lokasi", type: "string", example: "Ruang Guru"),
+                                ]
+                            )
+                        ),
+                    ]
+                )
+            )
+        ]
+    )]
     public function stokKritis()
     {
         $data = Item::stokKritis()
@@ -100,6 +160,58 @@ public function borrowingsTerlambat()
     // =========================================================
     // 3. Laporan peminjaman bulanan
     // =========================================================
+
+    #[OA\Get(
+        path: "/api/laporan/peminjaman",
+        summary: "Laporan peminjaman per bulan",
+        description: "Mengembalikan daftar semua peminjaman pada bulan dan tahun yang ditentukan.",
+        tags: ["API - Laporan"],
+        parameters: [
+            new OA\Parameter(
+                name: "bulan",
+                in: "query",
+                description: "Bulan (1-12), default bulan ini",
+                required: false,
+                schema: new OA\Schema(type: "integer", example: 5)
+            ),
+            new OA\Parameter(
+                name: "tahun",
+                in: "query",
+                description: "Tahun, default tahun ini",
+                required: false,
+                schema: new OA\Schema(type: "integer", example: 2025)
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Laporan peminjaman bulanan",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "status", type: "string", example: "ok"),
+                        new OA\Property(property: "bulan", type: "integer", example: 5),
+                        new OA\Property(property: "tahun", type: "integer", example: 2025),
+                        new OA\Property(property: "total", type: "integer", example: 12),
+                        new OA\Property(
+                            property: "data",
+                            type: "array",
+                            items: new OA\Items(
+                                properties: [
+                                    new OA\Property(property: "kode_peminjaman", type: "string", example: "BRW-20240501-001"),
+                                    new OA\Property(property: "nama_peminjam", type: "string", example: "Siti Aminah"),
+                                    new OA\Property(property: "nama_barang", type: "string", example: "Proyektor Epson"),
+                                    new OA\Property(property: "jumlah_pinjam", type: "integer", example: 1),
+                                    new OA\Property(property: "tanggal_pinjam", type: "string", format: "date", example: "2025-05-03"),
+                                    new OA\Property(property: "tanggal_kembali", type: "string", format: "date", example: "2025-05-05"),
+                                    new OA\Property(property: "status", type: "string", enum: ["pending", "dipinjam", "dikembalikan", "ditolak"], example: "dikembalikan"),
+                                ]
+                            )
+                        ),
+                    ]
+                )
+            )
+        ]
+    )]
     public function laporanPeminjaman(Request $request)
     {
         $bulan  = $request->get('bulan', now()->month);
@@ -131,6 +243,56 @@ public function borrowingsTerlambat()
     // =========================================================
     // 4. Laporan pengambilan bulanan
     // =========================================================
+
+    #[OA\Get(
+        path: "/api/laporan/pengambilan",
+        summary: "Laporan pengambilan konsumsi per bulan",
+        description: "Mengembalikan daftar pengambilan barang konsumsi pada bulan dan tahun yang ditentukan.",
+        tags: ["API - Laporan"],
+        parameters: [
+            new OA\Parameter(
+                name: "bulan",
+                in: "query",
+                description: "Bulan (1-12), default bulan ini",
+                required: false,
+                schema: new OA\Schema(type: "integer", example: 5)
+            ),
+            new OA\Parameter(
+                name: "tahun",
+                in: "query",
+                description: "Tahun, default tahun ini",
+                required: false,
+                schema: new OA\Schema(type: "integer", example: 2025)
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Laporan pengambilan bulanan",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "status", type: "string", example: "ok"),
+                        new OA\Property(property: "bulan", type: "integer", example: 5),
+                        new OA\Property(property: "tahun", type: "integer", example: 2025),
+                        new OA\Property(property: "total", type: "integer", example: 30),
+                        new OA\Property(
+                            property: "data",
+                            type: "array",
+                            items: new OA\Items(
+                                properties: [
+                                    new OA\Property(property: "nama_pengambil", type: "string", example: "Ahmad Fauzi"),
+                                    new OA\Property(property: "sebagai", type: "string", enum: ["murid", "pegawai"], example: "murid"),
+                                    new OA\Property(property: "nama_barang", type: "string", example: "Kertas A4"),
+                                    new OA\Property(property: "jumlah_ambil", type: "integer", example: 2),
+                                    new OA\Property(property: "tanggal_ambil", type: "string", format: "date", example: "2025-05-10"),
+                                ]
+                            )
+                        ),
+                    ]
+                )
+            )
+        ]
+    )]
     public function laporanPengambilan(Request $request)
     {
         $bulan = $request->get('bulan', now()->month);
@@ -160,6 +322,55 @@ public function borrowingsTerlambat()
     // =========================================================
     // 5. Laporan barang masuk bulanan
     // =========================================================
+
+    #[OA\Get(
+        path: "/api/laporan/barang-masuk",
+        summary: "Laporan barang masuk per bulan",
+        description: "Mengembalikan daftar pencatatan barang masuk pada bulan dan tahun yang ditentukan.",
+        tags: ["API - Laporan"],
+        parameters: [
+            new OA\Parameter(
+                name: "bulan",
+                in: "query",
+                description: "Bulan (1-12), default bulan ini",
+                required: false,
+                schema: new OA\Schema(type: "integer", example: 5)
+            ),
+            new OA\Parameter(
+                name: "tahun",
+                in: "query",
+                description: "Tahun, default tahun ini",
+                required: false,
+                schema: new OA\Schema(type: "integer", example: 2025)
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Laporan barang masuk bulanan",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "status", type: "string", example: "ok"),
+                        new OA\Property(property: "bulan", type: "integer", example: 5),
+                        new OA\Property(property: "tahun", type: "integer", example: 2025),
+                        new OA\Property(property: "total", type: "integer", example: 8),
+                        new OA\Property(
+                            property: "data",
+                            type: "array",
+                            items: new OA\Items(
+                                properties: [
+                                    new OA\Property(property: "nama_barang", type: "string", example: "Spidol Whiteboard"),
+                                    new OA\Property(property: "jumlah_masuk", type: "integer", example: 50),
+                                    new OA\Property(property: "tanggal_masuk", type: "string", format: "date", example: "2025-05-02"),
+                                    new OA\Property(property: "dicatat_oleh", type: "string", example: "Admin Sekolah"),
+                                ]
+                            )
+                        ),
+                    ]
+                )
+            )
+        ]
+    )]
     public function laporanBarangMasuk(Request $request)
     {
         $bulan = $request->get('bulan', now()->month);
@@ -188,6 +399,30 @@ public function borrowingsTerlambat()
     // =========================================================
     // 6. Rekap hari ini
     // =========================================================
+
+    #[OA\Get(
+        path: "/api/rekap-hari-ini",
+        summary: "Rekap aktivitas hari ini",
+        description: "Mengembalikan ringkasan jumlah aktivitas hari ini: barang masuk, pengambilan, peminjaman baru, pending, dan stok kritis.",
+        tags: ["API - Laporan"],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Rekap hari ini",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "status", type: "string", example: "ok"),
+                        new OA\Property(property: "tanggal", type: "string", format: "date", example: "2025-05-30"),
+                        new OA\Property(property: "barang_masuk", type: "integer", example: 2),
+                        new OA\Property(property: "pengambilan", type: "integer", example: 15),
+                        new OA\Property(property: "peminjaman_baru", type: "integer", example: 3),
+                        new OA\Property(property: "pending", type: "integer", example: 1),
+                        new OA\Property(property: "stok_kritis", type: "integer", example: 4),
+                    ]
+                )
+            )
+        ]
+    )]
     public function rekapHariIni()
     {
         $today = now()->toDateString();
@@ -203,6 +438,36 @@ public function borrowingsTerlambat()
         ]);
     }
 
+    // =========================================================
+    // 7. Tandai notifikasi sudah terkirim
+    // =========================================================
+
+    #[OA\Post(
+        path: "/api/borrowings/tandai-notifikasi",
+        summary: "Tandai notifikasi peminjaman sudah terkirim",
+        description: "Digunakan oleh n8n setelah berhasil mengirim notifikasi, agar peminjaman tidak dinotifikasi ulang dalam 24 jam.",
+        tags: ["API - Laporan"],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["kode_peminjaman"],
+                properties: [
+                    new OA\Property(property: "kode_peminjaman", type: "string", example: "BRW-20240101-001"),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Berhasil ditandai",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "status", type: "string", example: "ok"),
+                    ]
+                )
+            )
+        ]
+    )]
     public function tandaiNotifikasi(Request $request)
     {
         $kode = $request->kode_peminjaman;
@@ -211,5 +476,5 @@ public function borrowingsTerlambat()
             ->update(['notifikasi_terkirim_at' => now()]);
 
         return response()->json(['status' => 'ok']);
-}
+    }
 }
